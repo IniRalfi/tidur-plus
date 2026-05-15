@@ -1,6 +1,6 @@
 # 📚 PRD — Sistem Manajemen Perpustakaan Digital (RBAC)
 
-> Terinspirasi dari **BOBO+** | Versi: `v0.1-draft` | Tanggal: 15 Mei 2026
+> Terinspirasi dari **BOBO+** | Versi: `v0.2` | Tanggal: 15 Mei 2026
 
 ---
 
@@ -80,9 +80,21 @@ Sistem ini dibangun untuk mendigitalkan proses manajemen perpustakaan konvension
 
 ### BR-01: Pinjam Buku
 
+- **Durasi pinjam default: 14 hari** sejak tanggal validasi Admin.
+- **Maksimal 2 buku** yang boleh dipinjam secara bersamaan per anggota.
+- Jika anggota sudah meminjam 2 buku aktif, fitur "Pesan Buku" akan dinonaktifkan sampai salah satu dikembalikan.
 - Anggota **wajib login** untuk memesan atau meminjam buku.
 - Status peminjaman harus divalidasi oleh **Admin** sebelum buku dianggap "dipinjam".
 - Satu anggota hanya bisa meminjam buku yang sama sekali (tidak bisa duplikat aktif).
+
+### BR-05: Denda Keterlambatan
+
+- Denda dikenakan jika buku **belum dikembalikan melewati `tgl_kembali_rencana`**.
+- **Tarif denda**: Ditentukan oleh Super Admin via halaman Konfigurasi (default: Rp 1.000/hari).
+- Denda dihitung otomatis: `(tgl_kembali_aktual - tgl_kembali_rencana) × tarif_per_hari`.
+- Jika ada perpanjangan yang disetujui, `tgl_kembali_rencana` ter-update sehingga denda dihitung dari tanggal baru.
+- **Status denda**: `belum_lunas` | `lunas` — Admin yang menandai lunas secara manual (asumsi pembayaran cash di lokasi).
+- Anggota yang masih punya denda **belum_lunas** tidak bisa melakukan pesanan baru.
 
 ### BR-02: Perpanjangan Masa Pinjam
 
@@ -92,14 +104,24 @@ Sistem ini dibangun untuk mendigitalkan proses manajemen perpustakaan konvension
 - Pengajuan perpanjangan harus mendapat **validasi dari Admin** (Acc / Tolak).
 - Perpanjangan **tidak bisa diajukan** jika sudah mencapai batas 2 kali.
 
+### BR-06: Registrasi & Autentikasi
+
+- Registrasi dan Login menggunakan **Google OAuth** — tidak ada form email/password manual.
+- Setelah login pertama via Google, akun **langsung aktif** sebagai Anggota tanpa verifikasi email tambahan.
+- Admin dan Super Admin tetap dibuat manual oleh Super Admin (bukan via OAuth publik).
+
 ### BR-03: Status Peminjaman
 
 Alur status transaksi peminjaman:
 
 ```
-[Dipesan] → [Diproses Admin] → [Dipinjam] → [Pengajuan Kembali] → [Dikembalikan]
-                                    ↑
-                         [Perpanjangan (maks 2x)]
+[Dipesan] → [Diproses Admin] → [Dipinjam] ──────────────────────────► [Dikembalikan]
+                                    │              ↑                        │
+                                    │   [Perpanjangan Disetujui]            │
+                                    │   (maks 2x, +1/2/3 hari)             │
+                                    │                                       ▼
+                                    └──────────────────────────► [Cek Denda]
+                                                                  (jika terlambat)
 ```
 
 ### BR-04: Registrasi
@@ -177,6 +199,8 @@ Alur status transaksi peminjaman:
 | `/admin/peminjaman`     | Kelola semua transaksi          |
 | `/admin/peminjaman/:id` | Detail + tombol validasi status |
 
+| `/admin/denda` | Kelola denda & tandai lunas |
+
 ### Super Admin (Protected)
 
 | Halaman                   | Keterangan             |
@@ -191,57 +215,90 @@ Alur status transaksi peminjaman:
 
 ```
 User
-  id, name, email, password_hash, role (ENUM: anggota|admin|super_admin), created_at
+  id, name, email, google_id, avatar_url,
+  role (ENUM: anggota|admin|super_admin),
+  created_at
 
 Buku
-  id, judul, pengarang, penerbit, tahun, isbn, kategori_id, stok, cover_url, deskripsi
+  id, judul, pengarang, penerbit, tahun, isbn,
+  kategori_id, stok, cover_url, cover_source (ENUM: upload|url),
+  deskripsi, created_at
 
 Kategori
   id, nama
 
 Peminjaman
-  id, user_id, buku_id, status (ENUM: dipesan|dipinjam|dikembalikan|ditolak),
-  tgl_pinjam, tgl_kembali_rencana, tgl_kembali_aktual, counter_perpanjangan (default: 0)
+  id, user_id, buku_id,
+  status (ENUM: dipesan|dipinjam|dikembalikan|ditolak),
+  tgl_pinjam, tgl_kembali_rencana, tgl_kembali_aktual,
+  counter_perpanjangan (default: 0, max: 2)
 
 Perpanjangan
-  id, peminjaman_id, durasi_hari (1|2|3), status (ENUM: menunggu|disetujui|ditolak),
+  id, peminjaman_id, durasi_hari (1|2|3),
+  status (ENUM: menunggu|disetujui|ditolak),
   tgl_pengajuan, tgl_diproses, admin_id
+
+Denda
+  id, peminjaman_id, user_id,
+  jumlah_hari_telat, tarif_per_hari, total_denda,
+  status (ENUM: belum_lunas|lunas),
+  tgl_lunas, admin_id
+
+Konfigurasi
+  id, key (UNIQUE), value, updated_by, updated_at
+  -- Contoh key: 'tarif_denda_per_hari', 'durasi_pinjam_default', 'maks_buku_per_anggota'
 ```
 
 ---
 
 ## 9. Tech Stack (Monorepo)
 
-| Layer        | Tech                                      |
-| ------------ | ----------------------------------------- |
-| **Frontend** | React + Vite + Tailwind v4                |
-| **Backend**  | ElysiaJS / Express + TypeScript           |
-| **Database** | PostgreSQL + Prisma ORM                   |
-| **Auth**     | JWT (Access + Refresh Token)              |
-| **Monorepo** | Bun Workspaces                            |
-| **Shared**   | `shared/` package untuk types & constants |
+| Layer        | Tech                                            |
+| ------------ | ----------------------------------------------- |
+| **Frontend** | React + Vite + Tailwind v4                      |
+| **Backend**  | ElysiaJS / Express + TypeScript                 |
+| **Database** | PostgreSQL + Prisma ORM                         |
+| **Auth**     | Google OAuth 2.0 + JWT (Access + Refresh Token) |
+| **Monorepo** | Bun Workspaces                                  |
+| **Shared**   | `shared/` package untuk types & constants       |
 
 ---
 
 ## 10. Out of Scope (v1)
 
 - Notifikasi email / SMS (reminder jatuh tempo)
-- Pembayaran denda keterlambatan
+- Pembayaran denda online / payment gateway (denda dicatat manual)
 - Fitur ulasan / rating buku
 - Export laporan PDF
+- Registrasi manual via email/password
 
 > Fitur-fitur di atas bisa dipertimbangkan untuk **v2**.
 
 ---
 
-## 11. Open Questions
+## 11. Keputusan Desain (Resolved)
 
 > [!NOTE]
-> Hal-hal di bawah ini perlu konfirmasi dari kamu sebelum kita lanjut ke tahap development:
+> Semua pertanyaan awal sudah dijawab dan diimplementasikan ke PRD.
 
-Poin Detail
-Durasi pinjam 14 hari sejak validasi Admin
-Maks buku 2 buku aktif — kalau udah 2, tombol "Pesan" dinonaktifkan
-Cover buku Bisa upload file langsung atau input URL (disimpan kolom cover_source)
-Denda BR-05 baru: tarif per hari konfigurabel oleh Super Admin (default Rp 1.000), dihitung otomatis, admin tandai lunas manual, anggota ada denda belum lunas → tidak bisa pesan baru
-Auth BR-06 baru: Google OAuth, langsung aktif, Admin/Super Admin dibuat manual
+| #   | Pertanyaan            | Keputusan                                                  |
+| --- | --------------------- | ---------------------------------------------------------- |
+| 1   | Durasi pinjam default | **14 hari** sejak validasi Admin                           |
+| 2   | Maks buku per anggota | **2 buku** aktif bersamaan                                 |
+| 3   | Cover buku            | **Upload file** atau **URL eksternal** (keduanya didukung) |
+| 4   | Sistem denda          | **Ada** — tarif konfigurabel, pencatatan manual oleh Admin |
+| 5   | Verifikasi email      | **Tidak perlu** — gunakan **Google OAuth**, langsung aktif |
+
+---
+
+## 12. Next Steps
+
+- [ ] Review & sign-off PRD ini
+- [ ] Setup monorepo: `frontend/`, `backend/`, `shared/`
+- [ ] Desain skema database final (Prisma schema)
+- [ ] Setup Google OAuth credentials
+- [ ] Implementasi autentikasi & middleware RBAC
+- [ ] Implementasi modul Buku & Katalog
+- [ ] Implementasi modul Peminjaman & Perpanjangan
+- [ ] Implementasi modul Denda
+- [ ] Dashboard Admin & Super Admin

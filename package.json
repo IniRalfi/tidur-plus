@@ -1,0 +1,15 @@
+{
+  "name": "tidur-plus",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:fe": "bun --cwd frontend dev",
+    "dev:be": "bun --cwd backend dev",
+    "install:all": "bun install"
+  }
+}

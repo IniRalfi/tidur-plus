@@ -8,6 +8,7 @@ datasource db {
 }
 
 enum Role {
+<<<<<<< HEAD
   anggota
   admin
   super_admin
@@ -82,10 +83,85 @@ model Buku {
   peminjaman Peminjaman[]
 
   @@map("buku")
+=======
+  ANGGOTA
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum StatusPeminjaman {
+  MENUNGGU
+  DIPINJAM
+  DIKEMBALIKAN
+  DITOLAK
+}
+
+enum StatusPerpanjangan {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+}
+
+enum StatusDenda {
+  BELUM_LUNAS
+  LUNAS
+}
+
+// ===========================
+// MODELS
+// ===========================
+
+model User {
+  id           String   @id @default(cuid())
+  googleId     String?  @unique
+  nama         String
+  email        String   @unique
+  foto         String?
+  role         Role     @default(ANGGOTA)
+  aktif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relasi
+  peminjaman           Peminjaman[]
+  auditLog             AuditLog[]
+  perpanjanganDiproses Perpanjangan[] @relation("PerpanjanganAdmin")
+  dendaDiproses        Denda[]        @relation("DendaAdmin")
+}
+
+model Kategori {
+  id        String   @id @default(cuid())
+  nama      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi
+  buku Buku[]
+}
+
+model Buku {
+  id          String   @id @default(cuid())
+  judul       String
+  penulis     String
+  penerbit    String?
+  tahunTerbit Int?
+  isbn        String?  @unique
+  stok        Int      @default(0)
+  cover       String?
+  deskripsi   String?
+  kategoriId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relasi
+  kategori   Kategori     @relation(fields: [kategoriId], references: [id])
+  peminjaman Peminjaman[]
+>>>>>>> backend
 }
 
 model Peminjaman {
   id                  String           @id @default(cuid())
+<<<<<<< HEAD
   userId              String           @map("user_id")
   bukuId              String           @map("buku_id")
   status              StatusPeminjaman @default(dipesan)
@@ -102,10 +178,28 @@ model Peminjaman {
   denda        Denda[]
 
   @@map("peminjaman")
+=======
+  userId              String
+  bukuId              String
+  tanggalPinjam       DateTime?
+  tanggalKembali      DateTime?
+  batasKembali        DateTime?
+  status              StatusPeminjaman @default(MENUNGGU)
+  counterPerpanjangan Int              @default(0) 
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relasi
+  user         User           @relation(fields: [userId], references: [id])
+  buku         Buku           @relation(fields: [bukuId], references: [id])
+  perpanjangan Perpanjangan[]
+  denda        Denda?
+>>>>>>> backend
 }
 
 model Perpanjangan {
   id           String             @id @default(cuid())
+<<<<<<< HEAD
   peminjamanId String             @map("peminjaman_id")
   durasiHari   Int                @map("durasi_hari")
   status       StatusPerpanjangan @default(menunggu)
@@ -117,10 +211,24 @@ model Perpanjangan {
   admin      User?      @relation("AdminPerpanjangan", fields: [adminId], references: [id])
 
   @@map("perpanjangan")
+=======
+  peminjamanId String
+  adminId      String?            // admin yang approve/tolak perpanjangan
+  jumlahHari   Int                // extend peminjaman 1, 2, atau 3 hari (dipilih anggota)
+  status       StatusPerpanjangan @default(MENUNGGU)
+  tglDiproses  DateTime?          // kapan admin memproses
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Relasi
+  peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
+  admin      User?      @relation("PerpanjanganAdmin", fields: [adminId], references: [id])
+>>>>>>> backend
 }
 
 model Denda {
   id              String      @id @default(cuid())
+<<<<<<< HEAD
   peminjamanId    String      @map("peminjaman_id")
   userId          String      @map("user_id")
   jumlahHariTelat Int         @map("jumlah_hari_telat")
@@ -149,3 +257,38 @@ model Konfigurasi {
 
   @@map("konfigurasi")
 }
+=======
+  peminjamanId    String      @unique
+  adminId         String?     // admin yang menandai pelunasan
+  jumlah          Float       // total denda = jumlahHariTelat * tarifPerHari
+  jumlahHariTelat Int         // berapa hari terlambat
+  tarifPerHari    Float       // tarif saat denda dibuat
+  status          StatusDenda @default(BELUM_LUNAS)
+  tglLunas        DateTime?  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relasi
+  peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
+  admin      User?      @relation("DendaAdmin", fields: [adminId], references: [id])
+}
+
+model Konfigurasi {
+  id              String   @id @default(cuid())
+  tarifDenda      Float    @default(1000)  // Rp 1.000/hari
+  durasiPinjam    Int      @default(14)     // 14 hari (2 minggu)
+  maxPerpanjangan Int      @default(2)
+  updatedAt       DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  aksi      String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  // Relasi
+  user User @relation(fields: [userId], references: [id])
+}
+>>>>>>> backend

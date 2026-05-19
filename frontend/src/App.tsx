@@ -1,39 +1,34 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { APITester } from "./APITester";
-import { Calendar, CalendarDayButton } from "./components/ui/calendar";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
+import UsersPage from "./pages/superadmin/UsersPage";
+import KonfigurasiPage from "./pages/superadmin/KonfigurasiPage";
+import AuditLogPage from "./pages/superadmin/AuditLogPage";
+
+function ComingSoon({ name }: { name: string }) {
+  return (
+    <div className="min-h-screen bg-[#fdfcfb] flex items-center justify-center font-primary">
+      <div className="text-center space-y-2">
+        <p className="text-2xl font-inter-bold text-[#5e432f]">{name}</p>
+        <p className="text-sm text-[#a18e62]">Halaman ini sedang dikerjakan oleh anggota tim.</p>
+      </div>
+    </div>
+  );
+}
 
 export function App() {
   return (
-    <div className="container mx-auto p-8 text-center relative z-10">
-      <div className="flex justify-center items-center gap-8 mb-8">
-        <img
-          src={logo}
-          alt="Bun Logo"
-          className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#646cffaa] scale-120"
-        />
-        <img
-          src={reactLogo}
-          alt="React Logo"
-          className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] [animation:spin_20s_linear_infinite]"
-        />
-      </div>
-      <Card>
-        <CardHeader className="gap-4">
-          <CardTitle className="text-3xl font-bold">Bun + React</CardTitle>
-          <CardDescription>
-            Edit{" "}
-            <code className="rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono">src/App.tsx</code>{" "}
-            and save to test HMR
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <APITester />
-        </CardContent>
-      </Card>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/superadmin" element={<Navigate to="/superadmin/users" replace />} />
+        <Route path="/superadmin/users" element={<UsersPage />} />
+        <Route path="/superadmin/konfigurasi" element={<KonfigurasiPage />} />
+        <Route path="/superadmin/audit-log" element={<AuditLogPage />} />
+
+        {/* ── 404 ── */}
+        <Route path="*" element={<ComingSoon name="404 — Halaman tidak ditemukan" />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 

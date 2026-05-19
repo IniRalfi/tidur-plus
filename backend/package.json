@@ -1,0 +1,16 @@
+{
+  "name": "@tidur-plus/backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "bun run prisma/seed.ts",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "elysia": "^1.4.28",
+    "prisma": "^6.0.0"
+  }
+}

@@ -1,6 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { APITester } from "./APITester";
 import { Calendar, CalendarDayButton } from "./components/ui/calendar";
+<<<<<<< HEAD
+=======
+import "./index.css";
+>>>>>>> backend
 
 import logo from "./logo.svg";
 import reactLogo from "./react.svg";

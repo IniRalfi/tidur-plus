@@ -1,8 +1,14 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+<<<<<<< HEAD
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap");
 
 @custom-variant dark (&:is(.dark *));
+=======
+
+@custom-variant dark (&:is(.dark *));
+
+>>>>>>> backend
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -110,6 +116,7 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+<<<<<<< HEAD
 @theme {
   /* --- Warna Tone: Earthy & Vibrant --- */
   /* Kelompok Vibrant (Orange-Red) */
@@ -134,10 +141,13 @@
 }
 
 /* --- Base Styles & Premium Touches --- */
+=======
+>>>>>>> backend
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+<<<<<<< HEAD
 
   html {
     scroll-behavior: smooth;
@@ -189,5 +199,9 @@
   }
   ::-webkit-scrollbar-thumb {
     @apply bg-moss-sage/30 rounded-full hover:bg-moss-sage/50 transition-colors;
+=======
+  body {
+    @apply bg-background text-foreground;
+>>>>>>> backend
   }
 }

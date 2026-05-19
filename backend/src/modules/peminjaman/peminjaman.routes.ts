@@ -6,7 +6,7 @@ export const peminjamanRoutes = new Elysia()
   // ANGGOTA
   // ===========================
   .get("/peminjaman", peminjamanController.getAll)
-  .get("/peminjaman/:peminjamanId/perpanjangan", peminjamanController.getById)
+  .get("/peminjaman/:id/perpanjangan", peminjamanController.getById)
   .post("/peminjaman", peminjamanController.create, {
     body: t.Object({
       userId: t.String(),

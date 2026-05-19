@@ -1,8 +1,12 @@
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
+// Placeholder auth - akan diisi Rafli
+const checkAuth = () => true;
+const checkRole = (_role: string) => true;
+
 export const usersService = {
-  // Get semua user dengan pagination & filter
+  // Get semua user
   getAll: async (params: {
     page?: number;
     limit?: number;
@@ -19,7 +23,10 @@ export const usersService = {
           { email: { contains: search, mode: "insensitive" as const } },
         ],
       }),
-      ...(role && { role: role as any }),
+      // Filter by role → cek apakah role ada di array roles
+      ...(role && {
+        roles: { has: role as any },
+      }),
     };
 
     const [data, total] = await Promise.all([
@@ -33,7 +40,7 @@ export const usersService = {
           nama: true,
           email: true,
           foto: true,
-          role: true,
+          roles: true,      // ← array of role
           aktif: true,
           createdAt: true,
           updatedAt: true,
@@ -57,7 +64,7 @@ export const usersService = {
         nama: true,
         email: true,
         foto: true,
-        role: true,
+        roles: true,
         aktif: true,
         createdAt: true,
         updatedAt: true,
@@ -75,13 +82,10 @@ export const usersService = {
     });
   },
 
-  // Update profil user (oleh user sendiri)
+  // Update profil user
   updateProfil: async (
     id: string,
-    body: {
-      nama?: string;
-      foto?: string;
-    }
+    body: { nama?: string; foto?: string }
   ) => {
     return await prisma.user.update({
       where: { id },
@@ -91,32 +95,64 @@ export const usersService = {
         nama: true,
         email: true,
         foto: true,
-        role: true,
+        roles: true,
         aktif: true,
         updatedAt: true,
       },
     });
   },
 
-  // Super Admin: update role user
-  updateRole: async (id: string, role: string) => {
-    const user = await prisma.user.findUnique({ where: { id } });
+  // Toggle role — ANGGOTA tidak bisa dihapus
+  toggleRole: async (userId: string, role: string) => {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error("NOT_FOUND");
 
-    return await prisma.user.update({
-      where: { id },
-      data: { role: role as any },
-      select: {
-        id: true,
-        nama: true,
-        email: true,
-        role: true,
-        aktif: true,
-      },
-    });
+    // ANGGOTA adalah role default — tidak bisa di-toggle
+    if (role === "ANGGOTA") throw new Error("CANNOT_TOGGLE_ANGGOTA");
+
+    const validRoles = ["ADMIN", "SUPER_ADMIN"];
+    if (!validRoles.includes(role)) throw new Error("INVALID_ROLE");
+
+    const sudahPunyaRole = user.roles.includes(role as any);
+
+    if (sudahPunyaRole) {
+      // Hapus role dari array
+      return await prisma.user.update({
+        where: { id: userId },
+        data: {
+          roles: {
+            set: user.roles.filter((r) => r !== role),
+          },
+        },
+        select: {
+          id: true,
+          nama: true,
+          email: true,
+          roles: true,
+          aktif: true,
+        },
+      });
+    } else {
+      // Tambah role ke array
+      return await prisma.user.update({
+        where: { id: userId },
+        data: {
+          roles: {
+            push: role as any,
+          },
+        },
+        select: {
+          id: true,
+          nama: true,
+          email: true,
+          roles: true,
+          aktif: true,
+        },
+      });
+    }
   },
 
-  // Super Admin: toggle aktif/nonaktif user
+  // Toggle aktif/nonaktif user
   toggleAktif: async (id: string) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new Error("NOT_FOUND");
@@ -128,32 +164,39 @@ export const usersService = {
         id: true,
         nama: true,
         email: true,
-        role: true,
+        roles: true,
         aktif: true,
       },
     });
   },
 
-  // Super Admin: hapus user
+  // Hapus user
   delete: async (id: string) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) throw new Error("NOT_FOUND");
 
-    return await prisma.user.delete({
-      where: { id },
-    });
+    return await prisma.user.delete({ where: { id } });
   },
 
-  // Get statistik user (untuk dashboard)
+  // Statistik user
   getStats: async () => {
-    const [total, anggota, admin, superAdmin, aktif] = await Promise.all([
+    const [total, aktif, anggota, admin, superAdmin] = await Promise.all([
       prisma.user.count(),
-      prisma.user.count({ where: { role: "ANGGOTA" } }),
-      prisma.user.count({ where: { role: "ADMIN" } }),
-      prisma.user.count({ where: { role: "SUPER_ADMIN" } }),
       prisma.user.count({ where: { aktif: true } }),
+      prisma.user.count({ where: { roles: { has: "ANGGOTA" } } }),
+      prisma.user.count({ where: { roles: { has: "ADMIN" } } }),
+      prisma.user.count({ where: { roles: { has: "SUPER_ADMIN" } } }),
     ]);
 
-    return { total, anggota, admin, superAdmin, aktif };
+    return { total, aktif, anggota, admin, superAdmin };
+  },
+
+  // Helper: cek apakah user punya role tertentu
+  hasRole: async (userId: string, role: string): Promise<boolean> => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true },
+    });
+    return user?.roles.includes(role as any) ?? false;
   },
 };

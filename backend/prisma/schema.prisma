@@ -31,26 +31,23 @@ enum StatusDenda {
   LUNAS
 }
 
-// ===========================
-// MODELS
-// ===========================
-
 model User {
-  id           String   @id @default(cuid())
-  googleId     String?  @unique
-  nama         String
-  email        String   @unique
-  foto         String?
-  role         Role     @default(ANGGOTA)
-  aktif        Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(cuid())
+  googleId  String?  @unique
+  nama      String
+  email     String   @unique
+  foto      String?
+  roles     Role[]   @default([ANGGOTA])
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Relasi
   peminjaman           Peminjaman[]
   auditLog             AuditLog[]
   perpanjanganDiproses Perpanjangan[] @relation("PerpanjanganAdmin")
   dendaDiproses        Denda[]        @relation("DendaAdmin")
+
+  @@index([aktif])
 }
 
 model Kategori {
@@ -59,7 +56,6 @@ model Kategori {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relasi
   buku Buku[]
 }
 
@@ -77,9 +73,13 @@ model Buku {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Relasi
   kategori   Kategori     @relation(fields: [kategoriId], references: [id])
   peminjaman Peminjaman[]
+
+  @@index([kategoriId])
+  @@index([judul])
+  @@index([penulis])
+  @@index([stok])
 }
 
 model Peminjaman {
@@ -90,53 +90,59 @@ model Peminjaman {
   tanggalKembali      DateTime?
   batasKembali        DateTime?
   status              StatusPeminjaman @default(MENUNGGU)
-  counterPerpanjangan Int              @default(0) 
+  counterPerpanjangan Int              @default(0)
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 
-  // Relasi
   user         User           @relation(fields: [userId], references: [id])
   buku         Buku           @relation(fields: [bukuId], references: [id])
   perpanjangan Perpanjangan[]
   denda        Denda?
+
+  @@index([userId])
+  @@index([bukuId])
+  @@index([batasKembali])
 }
 
 model Perpanjangan {
   id           String             @id @default(cuid())
   peminjamanId String
-  adminId      String?            // admin yang approve/tolak perpanjangan
-  jumlahHari   Int                // extend peminjaman 1, 2, atau 3 hari (dipilih anggota)
+  adminId      String?
+  jumlahHari   Int
   status       StatusPerpanjangan @default(MENUNGGU)
-  tglDiproses  DateTime?          // kapan admin memproses
+  tglDiproses  DateTime?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  // Relasi
   peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
   admin      User?      @relation("PerpanjanganAdmin", fields: [adminId], references: [id])
+
+  @@index([peminjamanId])
+  @@index([adminId])
 }
 
 model Denda {
   id              String      @id @default(cuid())
   peminjamanId    String      @unique
-  adminId         String?     // admin yang menandai pelunasan
-  jumlah          Float       // total denda = jumlahHariTelat * tarifPerHari
-  jumlahHariTelat Int         // berapa hari terlambat
-  tarifPerHari    Float       // tarif saat denda dibuat
+  adminId         String?
+  jumlah          Float
+  jumlahHariTelat Int
+  tarifPerHari    Float
   status          StatusDenda @default(BELUM_LUNAS)
-  tglLunas        DateTime?  
+  tglLunas        DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  // Relasi
   peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
   admin      User?      @relation("DendaAdmin", fields: [adminId], references: [id])
+
+  @@index([adminId])
 }
 
 model Konfigurasi {
   id              String   @id @default(cuid())
-  tarifDenda      Float    @default(1000)  // Rp 1.000/hari
-  durasiPinjam    Int      @default(14)     // 14 hari (2 minggu)
+  tarifDenda      Float    @default(1000)
+  durasiPinjam    Int      @default(14)
   maxPerpanjangan Int      @default(2)
   updatedAt       DateTime @updatedAt
 }
@@ -148,6 +154,8 @@ model AuditLog {
   detail    String?
   createdAt DateTime @default(now())
 
-  // Relasi
   user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
 }

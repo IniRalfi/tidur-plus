@@ -11,3 +11,8 @@ Thumbs.db
 .vscode/
 .idea/
 bun.lock
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma

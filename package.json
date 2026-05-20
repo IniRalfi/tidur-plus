@@ -8,12 +8,14 @@
     "shared"
   ],
   "scripts": {
+    "dev": "concurrently \"bun run dev:fe\" \"bun run dev:be\"",
     "dev:fe": "bun --cwd frontend dev",
     "dev:be": "bun --cwd backend dev",
     "install:all": "bun install"
   },
-  "dependencies": {
-    "lucide-react": "^1.16.0",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+   "lucide-react": "^1.16.0",
     "react-router-dom": "^7.15.1"
   }
 }

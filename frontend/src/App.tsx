@@ -34,6 +34,7 @@ import RegisterPage from "./pages/auth/RegisterPage";
 import CallbackPage from "./pages/auth/CallbackPage";
 
 // Layouts
+import AnggotaLayout from "./components/layout/AnggotaLayout";
 import AdminLayout from "./components/layout/AdminLayout";
 import AuthWrapper from "./components/auth/AuthWrapper";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -87,12 +88,14 @@ export default function App() {
           <Route path="/katalog" element={<KatalogPage />} />
           <Route path="/katalog/:id" element={<BukuDetailPage />} />
 
-          {/* 🔐 Routing Kelompok Anggota (Default) */}
+          {/* 🔐 Routing Kelompok Anggota (Default) dengan AnggotaLayout */}
           <Route element={<ProtectedRoute allowedRoles={[Role.ANGGOTA, Role.ADMIN, Role.SUPER_ADMIN]} />}>
-            <Route path="/dashboard" element={<AnggotaDashboardPage />} />
-            <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
-            <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
-            <Route path="/profil" element={<ProfilPage />} />
+            <Route element={<AnggotaLayout />}>
+              <Route path="/dashboard" element={<AnggotaDashboardPage />} />
+              <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
+              <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
+              <Route path="/profil" element={<ProfilPage />} />
+            </Route>
           </Route>
 
           {/* 🔐 Routing Kelompok Admin menggunakan Pembungkus AdminLayout */}

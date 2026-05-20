@@ -48,14 +48,13 @@ export const authController = {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const redirectUri = process.env.GOOGLE_REDIRECT_URI;
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile`;
-    set.redirect = url;
+    return Response.redirect(url, 302);
   },
 
   googleCallback: async ({ query, set }: any) => {
     const { code } = query;
     if (!code) {
-      set.redirect = `${process.env.FRONTEND_URL}/login?error=auth_failed`;
-      return;
+      return Response.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`, 302);
     }
     
     try {
@@ -88,10 +87,10 @@ export const authController = {
         foto: googleUser.picture,
       });
 
-      set.redirect = `${process.env.FRONTEND_URL}/auth/google/callback?accessToken=${data.accessToken}&refreshToken=${data.refreshToken}`;
+      return Response.redirect(`${process.env.FRONTEND_URL}/auth/google/callback?accessToken=${data.accessToken}&refreshToken=${data.refreshToken}`, 302);
     } catch (error) {
       console.error(error);
-      set.redirect = `${process.env.FRONTEND_URL}/login?error=auth_failed`;
+      return Response.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`, 302);
     }
   },
 };

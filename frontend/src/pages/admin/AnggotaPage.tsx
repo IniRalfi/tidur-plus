@@ -6,7 +6,7 @@ import { Role } from "@tidur-plus/shared";
 export default function AnggotaPage() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
-    queryFn: usersService.getAll,
+    queryFn: usersService.getAllAnggota,
   });
 
   // Filter hanya untuk anggota (bukan super admin) - admin biasa mungkin bisa liat admin lain atau cuma anggota

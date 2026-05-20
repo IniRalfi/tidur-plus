@@ -38,15 +38,16 @@ export default function LoginPage() {
       const user = await authService.login(formData.email, formData.password);
       setUser(user);
       
-      const from = location.state?.from?.pathname || "/";
-      if (from !== "/") {
+      let from = location.state?.from?.pathname || "/";
+      
+      // Jika dari root, atau admin mencoba masuk ke dashboard anggota, arahkan ke dashboard yang benar
+      if (from === "/" || (from === "/dashboard" && !user.roles.includes(Role.ANGGOTA as Role))) {
+        if (user.roles.includes(Role.SUPER_ADMIN as Role)) navigate("/superadmin", { replace: true });
+        else if (user.roles.includes(Role.ADMIN as Role)) navigate("/admin/dashboard", { replace: true });
+        else navigate("/dashboard", { replace: true });
+      } else {
         navigate(from, { replace: true });
-        return;
       }
-
-      if (user.roles.includes(Role.SUPER_ADMIN as Role)) navigate("/superadmin", { replace: true });
-      else if (user.roles.includes(Role.ADMIN as Role)) navigate("/admin/dashboard", { replace: true });
-      else navigate("/dashboard", { replace: true });
       
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Email atau password salah");

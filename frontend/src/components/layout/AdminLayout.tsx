@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
+import { queryClient } from "../../lib/query-client";
 
 export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   
   const handleLogout = () => {
+    queryClient.clear();
     logout();
     navigate("/login");
   };

@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 
+import { queryClient } from "../../lib/query-client";
+
 export default function ProfilPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   
   const handleLogout = () => {
+    queryClient.clear();
     logout();
     navigate("/login");
   };

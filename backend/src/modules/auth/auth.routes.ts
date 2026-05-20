@@ -1,8 +1,9 @@
 import { Elysia, t } from "elysia";
 import { authController } from "./auth.controller";
-import { requireAuth } from "../../middlewares/auth.middleware";
+import { requireAuth, authMiddleware } from "../../middlewares/auth.middleware";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
+  .use(authMiddleware)
   .post("/register", authController.register, {
     body: t.Object({
       nama: t.String(),

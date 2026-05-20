@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+// Landing Page
+import LandingPage from "./components/landing/LandingPage";
+
 // Public Pages
 import KatalogPage from "./pages/public/KatalogPage";
 import BukuDetailPage from "./pages/public/BukuDetailPage";
@@ -46,6 +49,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
         {/* Routing Umum / Autentikasi & Profil */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -53,7 +59,7 @@ export default function App() {
         <Route path="/auth/google/callback" element={<CallbackPage />} />
 
         {/* URL utama akan buka Dashboard Anggota (sebagai Home) */}
-        <Route path="/" element={<AnggotaDashboardPage />} />
+        <Route path="/dashboard" element={<AnggotaDashboardPage />} />
         
         {/* Public Routes */}
         <Route path="/katalog" element={<KatalogPage />} />

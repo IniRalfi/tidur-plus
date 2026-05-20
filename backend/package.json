@@ -12,10 +12,11 @@
     "db:studio": "bunx prisma studio"
   },
   "dependencies": {
-    "@tidur-plus/shared": "workspace:*",
     "@elysiajs/cors": "latest",
     "@elysiajs/jwt": "latest",
     "@prisma/client": "^6.0.0",
+    "@tidur-plus/shared": "workspace:*",
+    "dotenv": "^17.4.2",
     "elysia": "latest"
   },
   "devDependencies": {

@@ -40,28 +40,16 @@ function App() {
           </Card>
         </StaggerList>
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import ProfilPage from "./pages/anggota/ProfilPage"; 
-import CallbackPage from "./pages/auth/CallbackPage";
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-
-        //Routing
 
 // Public Pages
 import KatalogPage from "./pages/public/KatalogPage";
 import BukuDetailPage from "./pages/public/BukuDetailPage";
 
 // Anggota Pages
-import ProfilPage from "./pages/anggota/ProfilPage";
 import AnggotaDashboardPage from "./pages/anggota/DashboardPage";
 import AnggotaPeminjamanPage from "./pages/anggota/PeminjamanPage";
 import AnggotaPeminjamanDetailPage from "./pages/anggota/PeminjamanDetailPage";
+import ProfilPage from "./pages/anggota/ProfilPage";
 
 // Admin Pages
 import AdminDashboardPage from "./pages/admin/DashboardPage";
@@ -100,24 +88,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Routing Umum / Autentikasi & Profil */}
+        {/* Redirect halaman utama ke login */}
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Auth & Profil */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profil" element={<ProfilPage />} />
         <Route path="/auth/google/callback" element={<CallbackPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
 
-        {/* URL utama akan buka Dashboard Anggota (sebagai Home) */}
-        <Route path="/" element={<AnggotaDashboardPage />} />
-        
         {/* Public Routes */}
         <Route path="/katalog" element={<KatalogPage />} />
         <Route path="/katalog/:id" element={<BukuDetailPage />} />
-        
+
         {/* Anggota Routes */}
+        <Route path="/dashboard" element={<AnggotaDashboardPage />} />
         <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
         <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
 
@@ -143,4 +128,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

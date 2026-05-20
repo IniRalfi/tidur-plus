@@ -40,6 +40,18 @@ function App() {
           </Card>
         </StaggerList>
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ProfilPage from "./pages/anggota/ProfilPage"; 
+import CallbackPage from "./pages/auth/CallbackPage";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+
+        //Routing
 
 // Public Pages
 import KatalogPage from "./pages/public/KatalogPage";
@@ -93,6 +105,10 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profil" element={<ProfilPage />} />
         <Route path="/auth/google/callback" element={<CallbackPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
 
         {/* URL utama akan buka Dashboard Anggota (sebagai Home) */}
         <Route path="/" element={<AnggotaDashboardPage />} />

@@ -8,26 +8,27 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('access_token');
+
+      // Tidak ada token — langsung set loading false, user = null
       if (!token) {
-        setLoading(false);
+        setUser(null);
         return;
       }
 
+      // Ada token — coba verifikasi ke server
       try {
         const user = await authService.getMe();
         setUser(user);
-      } catch (error) {
-        console.error("Gagal verifikasi token:", error);
+      } catch {
+        // Token invalid/expired — bersihkan localStorage
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         setUser(null);
-      } finally {
-        setLoading(false);
       }
     };
 
     initAuth();
-  }, [setUser, setLoading]);
+  }, [setUser]);
 
   return <>{children}</>;
 }

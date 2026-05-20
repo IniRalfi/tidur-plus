@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "./stores/authStore";
+import { Role } from "@tidur-plus/shared";
 
 // Landing Page
 import LandingPage from "./components/landing/LandingPage";
@@ -31,12 +33,31 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import CallbackPage from "./pages/auth/CallbackPage";
 
-import { Role } from "@tidur-plus/shared";
-
 // Layouts
 import AdminLayout from "./components/layout/AdminLayout";
 import AuthWrapper from "./components/auth/AuthWrapper";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+// Halaman "/" — cerdas: kalau sudah login redirect ke dashboard, kalau belum tampil landing
+function HomePage() {
+  const { isAuthenticated, isLoading, user } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-[#fdfcfb]">
+        <div className="text-[#8b7355] animate-pulse text-sm">Memuat...</div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user) {
+    if (user.roles.includes(Role.SUPER_ADMIN)) return <Navigate to="/superadmin" replace />;
+    if (user.roles.includes(Role.ADMIN)) return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <LandingPage />;
+}
 
 function ComingSoon({ name }: { name: string }) {
   return (
@@ -54,8 +75,8 @@ export default function App() {
     <BrowserRouter>
       <AuthWrapper>
         <Routes>
-          {/* Landing Page */}
-          <Route path="/" element={<LandingPage />} />
+          {/* "/" — tampilkan landing jika belum login, redirect jika sudah */}
+          <Route path="/" element={<HomePage />} />
 
           {/* Auth */}
           <Route path="/login" element={<LoginPage />} />

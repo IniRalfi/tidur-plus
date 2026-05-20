@@ -2,11 +2,12 @@ import { Role } from '../constants/roles'
 
 export interface User {
   id: string
-  name: string
+  nama: string
   email: string
   googleId?: string
-  avatarUrl?: string
+  foto?: string
   roles: Role[]
+  aktif: boolean
   createdAt: string
   updatedAt: string
 }

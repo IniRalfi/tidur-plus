@@ -41,11 +41,11 @@ export default function AnggotaPage() {
             ) : (
               anggota.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50/40 transition-colors">
-                  <td className="p-4 font-medium text-gray-900">{user.name}</td>
+                  <td className="p-4 font-medium text-gray-900">{user.nama}</td>
                   <td className="p-4 text-gray-500">{user.email}</td>
                   <td className="p-4">
-                    <span className="text-xs px-2 py-1 rounded-sm font-medium bg-green-50 text-green-700">
-                      Aktif
+                    <span className={`text-xs px-2 py-1 rounded-sm font-medium ${user.aktif ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                      {user.aktif ? 'Aktif' : 'Non-aktif'}
                     </span>
                   </td>
                   <td className="p-4 text-right">

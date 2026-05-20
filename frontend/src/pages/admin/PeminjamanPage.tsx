@@ -1,41 +1,44 @@
-// frontend/src/pages/admin/PeminjamanPage.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-interface Peminjaman {
-  id: string;
-  namaAnggota: string;
-  judulBuku: string;
-  tglPinjam: string;
-  tglKembaliRencana: string;
-  status: "Dipesan" | "Dipinjam" | "Dikembalikan" | "Ditolak";
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { peminjamanService } from "../../lib/peminjaman.service";
 
 export default function PeminjamanPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState<string>("Semua Status");
 
-  const [dataPeminjaman, setDataPeminjaman] = useState<Peminjaman[]>([
-    { id: "PMJ-001", namaAnggota: "Christina S.", judulBuku: "Laskar Pelangi", tglPinjam: "20 Mei 2026", tglKembaliRencana: "03 Juni 2026", status: "Dipesan" },
-    { id: "PMJ-002", namaAnggota: "Rodi R.", judulBuku: "Bumi Manusia", tglPinjam: "14 Mei 2026", tglKembaliRencana: "28 Mei 2026", status: "Dipinjam" },
-    { id: "PMJ-003", namaAnggota: "Citra M.", judulBuku: "Perahu Kertas", tglPinjam: "01 Mei 2026", tglKembaliRencana: "15 Mei 2026", status: "Dikembalikan" }
-  ]);
+  const { data: dataPeminjaman = [], isLoading } = useQuery({
+    queryKey: ["admin-peminjaman"],
+    queryFn: peminjamanService.getAdminAll,
+  });
 
-  const handleSetujui = (id: string) => {
-    setDataPeminjaman(prev => prev.map(item => item.id === id ? { ...item, status: "Dipinjam" } : item));
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => 
+      peminjamanService.updateStatus(id, status),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-peminjaman"] }),
+  });
+
+  const kembalikanMutation = useMutation({
+    mutationFn: (id: string) => peminjamanService.kembalikanBuku(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-peminjaman"] }),
+  });
+
+  const handleSetujui = (id: string) => updateStatusMutation.mutate({ id, status: "DIPINJAM" });
+  const handleTolak = (id: string) => updateStatusMutation.mutate({ id, status: "DITOLAK" });
+  const handleSelesai = (id: string) => kembalikanMutation.mutate(id);
+
+  const statusMap: Record<string, string> = {
+    MENUNGGU: "Dipesan",
+    DIPINJAM: "Dipinjam",
+    DIKEMBALIKAN: "Dikembalikan",
+    DITOLAK: "Ditolak",
+    TERLAMBAT: "Terlambat",
   };
 
-  const handleTolak = (id: string) => {
-    setDataPeminjaman(prev => prev.map(item => item.id === id ? { ...item, status: "Ditolak" } : item));
-  };
-
-  const handleSelesai = (id: string) => {
-    setDataPeminjaman(prev => prev.map(item => item.id === id ? { ...item, status: "Dikembalikan" } : item));
-  };
-
-  const dataTersaring = dataPeminjaman.filter(item => {
+  const dataTersaring = dataPeminjaman.filter((item: any) => {
     if (filterStatus === "Semua Status") return true;
-    return item.status === filterStatus;
+    return statusMap[item.status] === filterStatus || item.status === filterStatus;
   });
 
   return (
@@ -59,6 +62,7 @@ export default function PeminjamanPage() {
             <option value="Dipinjam">Dipinjam</option>
             <option value="Dikembalikan">Dikembalikan</option>
             <option value="Ditolak">Ditolak</option>
+            <option value="Terlambat">Terlambat</option>
           </select>
         </div>
       </div>
@@ -81,40 +85,44 @@ export default function PeminjamanPage() {
             </thead>
             {/* Isi baris tabel menggunakan teks gelap slate-700 */}
             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-              {dataTersaring.map((row) => (
+              {dataTersaring.map((row: any) => (
                 <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
                   
                   {/* ID Transaksi */}
-                  <td className="py-4 px-5 font-mono text-slate-500 font-medium">{row.id}</td>
+                  <td className="py-4 px-5 font-mono text-slate-500 font-medium">{row.id.substring(0, 8)}</td>
                   
                   {/* Nama Peminjam */}
-                  <td className="py-4 px-5 font-semibold text-slate-900">{row.namaAnggota}</td>
+                  <td className="py-4 px-5 font-semibold text-slate-900">{row.user?.nama || '-'}</td>
                   
                   {/* Judul Buku */}
-                  <td className="py-4 px-5 italic text-slate-600 font-medium">{row.judulBuku}</td>
+                  <td className="py-4 px-5 italic text-slate-600 font-medium">{row.buku?.judul || '-'}</td>
                   
                   {/* Tanggal Ajuan Pinjam */}
-                  <td className="py-4 px-5 text-slate-500">{row.tglPinjam}</td>
+                  <td className="py-4 px-5 text-slate-500">
+                    {row.createdAt ? new Date(row.createdAt).toLocaleDateString("id-ID") : '-'}
+                  </td>
                   
                   {/* Batas Waktu Pengembalian */}
-                  <td className="py-4 px-5 text-slate-500">{row.tglKembaliRencana}</td>
+                  <td className="py-4 px-5 text-slate-500">
+                    {row.batasKembali ? new Date(row.batasKembali).toLocaleDateString("id-ID") : '-'}
+                  </td>
                   
                   {/* Soft Badge Status (Latar belakang pudar dengan teks tegas) */}
                   <td className="py-4 px-5 text-center">
                     <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                      row.status === "Dipesan" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                      row.status === "Dipinjam" ? "bg-blue-50 text-blue-700 border border-blue-200" :
-                      row.status === "Dikembalikan" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
+                      row.status === "MENUNGGU" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                      row.status === "DIPINJAM" ? "bg-blue-50 text-blue-700 border border-blue-200" :
+                      row.status === "DIKEMBALIKAN" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
                       "bg-rose-50 text-rose-700 border border-rose-200"
                     }`}>
-                      {row.status}
+                      {statusMap[row.status] || row.status}
                     </span>
                   </td>
 
                   {/* Kelompok Tombol Operasional */}
                   <td className="py-4 px-5 text-right">
                     <div className="flex justify-end gap-1.5">
-                      {row.status === "Dipesan" && (
+                      {row.status === "MENUNGGU" && (
                         <>
                           <button 
                             onClick={() => handleSetujui(row.id)}
@@ -131,7 +139,7 @@ export default function PeminjamanPage() {
                         </>
                       )}
                       
-                      {row.status === "Dipinjam" && (
+                      {row.status === "DIPINJAM" && (
                         <button 
                           onClick={() => handleSelesai(row.id)}
                           className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium px-3 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer shadow-2xs"
@@ -140,7 +148,7 @@ export default function PeminjamanPage() {
                         </button>
                       )}
 
-                      {(row.status === "Dikembalikan" || row.status === "Ditolak") && (
+                      {(row.status === "DIKEMBALIKAN" || row.status === "DITOLAK") && (
                         <button 
                           onClick={() => navigate(`/admin/peminjaman/${row.id}`)}
                           className="text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-[11px] transition-colors cursor-pointer"

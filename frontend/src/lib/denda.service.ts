@@ -1,18 +1,23 @@
 import api from './api';
 
 export const dendaService = {
-  getAll: async () => {
-    const response = await api.get('/denda');
+  getAllAdmin: async () => {
+    const response = await api.get('/admin/denda');
     return response.data.data;
   },
 
-  getById: async (id: string) => {
-    const response = await api.get(`/denda/${id}`);
+  getByIdAdmin: async (id: string) => {
+    const response = await api.get(`/admin/denda/${id}`);
     return response.data.data;
   },
 
-  pay: async (id: string, amount: number) => {
-    const response = await api.post(`/denda/${id}/pay`, { amount });
+  getByPeminjaman: async (peminjamanId: string) => {
+    const response = await api.get(`/peminjaman/${peminjamanId}/denda`);
+    return response.data.data;
+  },
+
+  lunasi: async (id: string) => {
+    const response = await api.patch(`/admin/denda/${id}/lunas`);
     return response.data.data;
   }
 };

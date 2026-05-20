@@ -19,11 +19,18 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
       try {
         const user = await authService.getMe();
         setUser(user);
-      } catch {
-        // Token invalid/expired — bersihkan localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        setUser(null);
+      } catch (error: any) {
+        // Jangan hapus token jika errornya adalah Network Error atau server down (5xx)
+        // Biarkan interceptor (api.ts) yang membersihkan token jika refresh token gagal / 401
+        if (error.response?.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          setUser(null);
+        } else {
+          // Jika error lain (misal server down), kita biarkan user=null dulu, tapi jangan hapus token.
+          // Atau set user(null) agar redirect ke login
+          setUser(null);
+        }
       }
     };
 

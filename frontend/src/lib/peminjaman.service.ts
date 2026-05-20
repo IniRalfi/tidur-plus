@@ -6,6 +6,11 @@ export const peminjamanService = {
     return response.data.data;
   },
 
+  getAdminAll: async () => {
+    const response = await api.get('/admin/peminjaman');
+    return response.data.data;
+  },
+
   getById: async (id: string) => {
     const response = await api.get(`/peminjaman/${id}`);
     return response.data.data;

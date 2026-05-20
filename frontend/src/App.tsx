@@ -31,6 +31,8 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import CallbackPage from "./pages/auth/CallbackPage";
 
+import { Role } from "@tidur-plus/shared";
+
 // Layouts
 import AdminLayout from "./components/layout/AdminLayout";
 import AuthWrapper from "./components/auth/AuthWrapper";
@@ -65,7 +67,7 @@ export default function App() {
           <Route path="/katalog/:id" element={<BukuDetailPage />} />
 
           {/* 🔐 Routing Kelompok Anggota (Default) */}
-          <Route element={<ProtectedRoute allowedRoles={["ANGGOTA", "ADMIN", "SUPER_ADMIN"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={[Role.ANGGOTA, Role.ADMIN, Role.SUPER_ADMIN]} />}>
             <Route path="/dashboard" element={<AnggotaDashboardPage />} />
             <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
             <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
@@ -73,7 +75,7 @@ export default function App() {
           </Route>
 
           {/* 🔐 Routing Kelompok Admin menggunakan Pembungkus AdminLayout */}
-          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/buku" element={<BukuPage />} />
@@ -85,7 +87,7 @@ export default function App() {
           </Route>
 
           {/* 🔐 Routing Kelompok Superadmin */}
-          <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]} />}>
+          <Route element={<ProtectedRoute allowedRoles={[Role.SUPER_ADMIN]} />}>
             <Route path="/superadmin" element={<Navigate to="/superadmin/users" replace />} />
             <Route path="/superadmin/users" element={<UsersPage />} />
             <Route path="/superadmin/konfigurasi" element={<KonfigurasiPage />} />

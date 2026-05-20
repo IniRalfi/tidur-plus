@@ -33,7 +33,7 @@ export const authController = {
     }
   },
 
-  getMe: async ({ user, set }: { user: any; set: any }) => {
+  getMe: async ({ user, set }: any) => {
     try {
       if (!user?.id) throw new Error("UNAUTHORIZED");
       const data = await authService.getMe(user.id);

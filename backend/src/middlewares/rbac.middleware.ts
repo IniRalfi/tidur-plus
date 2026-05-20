@@ -6,15 +6,15 @@ import { authMiddleware } from "./auth.middleware";
 // Guard berdasarkan role
 // Contoh penggunaan: .use(requireRole(Role.ADMIN))
 export function requireRole(...allowedRoles: Role[]) {
-  return new Elysia()
+  return new Elysia({ name: "require-role" })
     .use(authMiddleware)
-    .onBeforeHandle(({ user, set }) => {
+    .onBeforeHandle(({ user, set }: any) => {
       if (!user) {
         set.status = 401;
         return errorResponse("Unauthorized", 401);
       }
 
-      const hasRole = user.roles.some((role) => allowedRoles.includes(role as Role));
+      const hasRole = user.roles.some((role: string) => allowedRoles.includes(role as Role));
       if (!hasRole) {
         set.status = 403;
         return errorResponse("Forbidden: Akses ditolak", 403);

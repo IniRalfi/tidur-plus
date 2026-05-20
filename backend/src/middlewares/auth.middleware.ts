@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { verify } from "../utils/jwt";
 import { errorResponse } from "../utils/response";
 
-export const authMiddleware = new Elysia().derive(async ({ request }) => {
+export const authMiddleware = new Elysia({ name: "auth" }).derive(async ({ request }) => {
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return { user: null };
@@ -25,9 +25,9 @@ export const authMiddleware = new Elysia().derive(async ({ request }) => {
   }
 });
 
-export const requireAuth = new Elysia()
+export const requireAuth = new Elysia({ name: "require-auth" })
   .use(authMiddleware)
-  .onBeforeHandle(({ user, set }) => {
+  .onBeforeHandle(({ user, set }: any) => {
     if (!user) {
       set.status = 401;
       return errorResponse("Unauthorized", 401);

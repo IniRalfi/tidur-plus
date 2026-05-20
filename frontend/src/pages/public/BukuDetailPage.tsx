@@ -9,7 +9,7 @@ const DUMMY_DETAIL = {
   isbn: '978-623-XXXX-XX-X',
   kategori: { id: 'k-1', nama: 'Teknologi' },
   stok: 5,
-  coverUrl: null, // Sengaja diset null biar mirip placeholder di screenshot kamu
+  coverUrl: null
   deskripsi: 'Buku ini dirancang khusus untuk pemula hingga tingkat lanjut yang ingin menguasai React 19 untuk membangun antarmuka web modern. Membahas tuntas fitur-fitur terbaru seperti arsitektur komponen, hooks baru, hingga integrasi dengan framework seperti Vite. Sangat cocok dibaca sambil ngopi di sore hari.',
 };
 
@@ -17,20 +17,15 @@ export default function BukuDetailPage() {
   const buku = DUMMY_DETAIL;
 
   return (
-    // Background ngikutin warna dasar aplikasi (putih warm)
     <main className="min-h-screen bg-background font-primary pb-16 pt-8">
       <div className="container mx-auto px-4 max-w-5xl">
-        
-        {/* Tombol Kembali (Navigasi) */}
-        <button className="text-moss-sage hover:text-sun-burn flex items-center gap-2 mb-8 font-inter-medium text-sm transition-colors cursor-pointer">
+                <button className="text-moss-sage hover:text-sun-burn flex items-center gap-2 mb-8 font-inter-medium text-sm transition-colors cursor-pointer">
           <span>←</span> Kembali ke Katalog
         </button>
 
         <div className="flex flex-col md:flex-row gap-10">
           
-          {/* KOLOM KIRI: Cover Buku */}
           <div className="w-full max-w-[280px] mx-auto md:mx-0 flex-shrink-0">
-            {/* Bedain dikit: Tambah shadow-lg biar cover bukunya lebih menonjol */}
             <div className="aspect-[3/4] bg-[#eef2f6] rounded-2xl overflow-hidden shadow-lg border border-border/40 flex items-center justify-center">
               {buku.coverUrl ? (
                 <img src={buku.coverUrl} alt={buku.judul} className="w-full h-full object-cover" />
@@ -42,10 +37,8 @@ export default function BukuDetailPage() {
             </div>
           </div>
 
-          {/* KOLOM KANAN: Detail Informasi */}
           <div className="w-full flex flex-col">
             
-            {/* Header Buku */}
             <div className="mb-6 border-b border-border/60 pb-6">
               <span className="inline-block px-3 py-1 bg-transparent border border-sun-glow/40 text-sun-burn text-[10px] uppercase tracking-widest font-inter-bold rounded-md mb-4">
                 {buku.kategori?.nama || 'Umum'}
@@ -58,7 +51,6 @@ export default function BukuDetailPage() {
               </p>
             </div>
 
-            {/* Sinopsis */}
             <div className="mb-8">
               <h3 className="text-xs font-inter-bold text-clay-coffee uppercase tracking-widest mb-3">
                 Sinopsis / Deskripsi
@@ -68,7 +60,6 @@ export default function BukuDetailPage() {
               </p>
             </div>
 
-            {/* Kotak Info Tambahan (Penerbit, Tahun, ISBN) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 mb-6 bg-card p-5 rounded-2xl border border-border/80 shadow-sm">
               <div>
                 <p className="text-xs text-moss-sage font-inter-medium mb-1">Penerbit</p>
@@ -84,7 +75,6 @@ export default function BukuDetailPage() {
               </div>
             </div>
 
-            {/* Kotak Aksi (Status Stok & Tombol Pesan) */}
             <div className="mt-auto bg-card p-5 rounded-2xl border border-border/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="w-full sm:w-auto">
                 <p className="text-xs text-moss-sage font-inter-medium mb-1">Ketersediaan Fisik</p>

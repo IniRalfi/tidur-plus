@@ -1,17 +1,5 @@
-// TODO: [PeminjamanDetailPage]
-// export default function PeminjamanDetailPage() {
-//   return (
-//     <main>
-//       <h1>PeminjamanDetailPage</h1>
-//       {/* TODO: implement */}
-//     </main>
-//   )
-// }
-
-
 import React, { useState } from 'react';
 
-// Data dummy spesifik untuk 1 transaksi yang sedang dipinjam
 const DUMMY_TRX_DETAIL = {
   id: 'trx-1',
   buku: { 
@@ -24,20 +12,18 @@ const DUMMY_TRX_DETAIL = {
   status: 'dipinjam',
   tglPinjam: '15 Mei 2026',
   tglKembaliRencana: '29 Mei 2026',
-  counterPerpanjangan: 1, // Ceritanya udah pernah perpanjang 1x (sisa 1x lagi)
+  counterPerpanjangan: 1,
 };
 
 export default function PeminjamanDetailPage() {
   const trx = DUMMY_TRX_DETAIL;
   
-  // State untuk nyimpen pilihan hari dari user
   const [durasiPerpanjangan, setDurasiPerpanjangan] = useState<number>(1);
 
   return (
     <main className="min-h-screen bg-background font-primary pb-16 pt-8">
       <div className="container mx-auto px-4 max-w-4xl">
         
-        {/* Tombol Kembali */}
         <button className="text-moss-sage hover:text-clay-coffee flex items-center gap-2 mb-8 transition-colors font-inter-medium text-sm cursor-pointer group">
           <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Kembali ke Rak Pinjaman
@@ -45,7 +31,6 @@ export default function PeminjamanDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
-          {/* KOLOM KIRI: Info Buku Singkat */}
           <div className="md:col-span-1 flex flex-col gap-4">
             <div className="bg-card border border-border/50 rounded-2xl p-4 shadow-sm">
               <div className="aspect-[3/4] bg-muted rounded-xl overflow-hidden mb-4 border border-border">
@@ -60,10 +45,8 @@ export default function PeminjamanDetailPage() {
             </div>
           </div>
 
-          {/* KOLOM KANAN: Detail Transaksi & Form Perpanjangan */}
           <div className="md:col-span-2 flex flex-col gap-6">
             
-            {/* Kartu Status Transaksi */}
             <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
               <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider mb-4 border-b border-border/50 pb-2">Detail Peminjaman</h3>
               
@@ -89,7 +72,6 @@ export default function PeminjamanDetailPage() {
               </div>
             </div>
 
-            {/* Area Form Perpanjangan (BR-02 Logic) */}
             <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-4 border-b border-border/50 pb-2">
                 <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider">Ajukan Perpanjangan</h3>
@@ -104,7 +86,6 @@ export default function PeminjamanDetailPage() {
                     Pilih durasi tambahan hari untuk masa pinjam buku ini (Maksimal 3 hari). Pengajuan harus divalidasi oleh Admin.
                   </p>
                   
-                  {/* Pilihan Durasi 1, 2, atau 3 Hari */}
                   <div className="flex gap-3">
                     {[1, 2, 3].map((hari) => (
                       <button 
@@ -121,7 +102,6 @@ export default function PeminjamanDetailPage() {
                     ))}
                   </div>
 
-                  {/* Tombol Submit */}
                   <button className="w-full mt-2 py-3 bg-sun-glow hover:bg-sun-burn text-white text-sm font-inter-bold rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
                     Kirim Pengajuan
                   </button>

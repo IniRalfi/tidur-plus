@@ -12,10 +12,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-background font-primary pb-16 pt-8 relative overflow-hidden">
-      
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
-        
-        {/* Header ala iPlusnas */}
         <div className="mb-10 p-6 bg-clay-coffee rounded-2xl flex items-center justify-between shadow-lg">
           <div>
             <span className="text-[10px] text-sun-glow font-inter-bold uppercase tracking-widest">Aplikasi Perpustakaan</span>
@@ -29,10 +26,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Grid Ringkasan ala iPusnas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-          
-          {/* Card 1: Buku Dipinjam Saat Ini */}
           <div className="bg-card border border-border p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <div className="flex justify-between items-start mb-5 relative z-10">
               <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider">Pinjaman Aktif</h3>
@@ -47,7 +41,6 @@ export default function DashboardPage() {
             <svg className="absolute w-24 h-24 text-border bottom-[-10%] right-[-10%] opacity-40 group-hover:opacity-70 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
           </div>
 
-          {/* Card 2: Total Riwayat Pinjam */}
           <div className="bg-card border border-border p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider mb-5 relative z-10">Total Riwayat Pinjam</h3>
             <div className="relative z-10">
@@ -59,7 +52,6 @@ export default function DashboardPage() {
             <svg className="absolute w-24 h-24 text-border bottom-[-10%] right-[-10%] opacity-40 group-hover:opacity-70 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           </div>
 
-          {/* Card 3: Menunggu Validasi */}
           <div className="bg-card border border-border p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider mb-5 relative z-10">Dipesan</h3>
             <div className="relative z-10">
@@ -71,7 +63,6 @@ export default function DashboardPage() {
             <svg className="absolute w-24 h-24 text-border bottom-[-10%] right-[-10%] opacity-40 group-hover:opacity-70 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
           </div>
 
-          {/* Card 4: Status Keuangan */}
           <div className="bg-card border border-border p-6 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
             <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider mb-5 relative z-10">Status Anggota</h3>
             <div className="relative z-10">
@@ -85,7 +76,6 @@ export default function DashboardPage() {
 
         </div>
 
-        {/* Kolom Akses Cepat */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex justify-between items-center mb-5 border-b border-border pb-3">
             <h3 className="text-sm font-inter-bold text-clay-coffee uppercase tracking-wider">Akses Cepat</h3>
@@ -111,7 +101,6 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
-
       </div>
     </main>
   );

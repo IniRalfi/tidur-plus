@@ -1,4 +1,6 @@
 import { Elysia } from "elysia";
+import { cors } from "@elysiajs/cors";
+import { authRoutes } from "./modules/auth/auth.routes";
 import { kategoriRoutes } from "./modules/kategori/kategori.routes";
 import { bukuRoutes } from "./modules/buku/buku.routes";
 import { peminjamanRoutes } from "./modules/peminjaman/peminjaman.routes";
@@ -8,10 +10,12 @@ import { usersRoutes } from "./modules/users/users.routes";
 import { konfigurasiRoutes } from "./modules/konfigurasi/konfigurasi.routes";
 
 const app = new Elysia()
+  .use(cors({ origin: process.env.FRONTEND_URL ?? "http://localhost:5173" }))
   .get("/", () => ({
     message: "Tidur Plus API is running! 🚀",
     version: "1.0.0",
   }))
+  .use(authRoutes)
   .use(kategoriRoutes)
   .use(bukuRoutes)
   .use(peminjamanRoutes)

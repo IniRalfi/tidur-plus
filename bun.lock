@@ -3,6 +3,10 @@
   "configVersion": 1,
   "workspaces": {
     "": {
+      "dependencies": {
+        "lucide-react": "^1.16.0",
+        "react-router-dom": "^7.15.1",
+      },
       "devDependencies": {
         "concurrently": "^9.2.1",
         "lucide-react": "^1.16.0",
@@ -39,7 +43,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
-        "lucide-react": "^0.545.0",
+        "lucide-react": "^1.16.0",
         "radix-ui": "^1.4.3",
         "react": "^19",
         "react-day-picker": "^10.0.1",

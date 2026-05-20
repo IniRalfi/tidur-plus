@@ -14,10 +14,10 @@
     "install:all": "bun install"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
-  },
-  "dependencies": {
+   
     "lucide-react": "^1.16.0",
+    "concurrently": "^9.2.1",
+   "lucide-react": "^1.16.0",
     "react-router-dom": "^7.15.1"
-  }
+  
 }

@@ -8,8 +8,12 @@
     "shared"
   ],
   "scripts": {
+    "dev": "concurrently \"bun run dev:fe\" \"bun run dev:be\"",
     "dev:fe": "bun --cwd frontend dev",
     "dev:be": "bun --cwd backend dev",
     "install:all": "bun install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

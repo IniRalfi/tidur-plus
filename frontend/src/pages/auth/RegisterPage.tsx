@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, UserPlus, BookOpen, Upload } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Select,
@@ -14,10 +14,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { authService } from "../../lib/auth.service";
+import { useAuthStore } from "../../stores/authStore";
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+  const { setUser } = useAuthStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [formData, setFormData] = useState({
     nik: "",
@@ -35,11 +42,28 @@ export default function RegisterPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    setErrorMsg("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Data Pendaftaran Anggota:", formData);
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMsg("Password dan konfirmasi password tidak cocok!");
+      return;
+    }
+    
+    setIsLoading(true);
+    setErrorMsg("");
+    try {
+      // Sementara kita kirim data utama dulu ke backend
+      const user = await authService.register(formData.name, formData.email, formData.password);
+      setUser(user);
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || "Gagal melakukan registrasi");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

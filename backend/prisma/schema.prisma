@@ -36,6 +36,7 @@ model User {
   googleId  String?  @unique
   nama      String
   email     String   @unique
+  password  String?  // nullable — bisa login via Google saja
   foto      String?
   roles     Role[]   @default([ANGGOTA])
   aktif     Boolean  @default(true)
@@ -48,6 +49,7 @@ model User {
   dendaDiproses        Denda[]        @relation("DendaAdmin")
 
   @@index([aktif])
+  @@index([email])
 }
 
 model Kategori {

@@ -1,9 +1,20 @@
-// frontend/src/components/layout/AdminLayout.tsx
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../stores/authStore";
+import { queryClient } from "../../lib/query-client";
 
 export default function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
   
+  const handleLogout = () => {
+    queryClient.clear();
+    logout();
+    navigate("/login");
+  };
+
   // Fungsi penanda menu sidebar aktif (menggunakan abu-abu terang yang elegan)
   const isActive = (path: string) => location.pathname === path;
 
@@ -91,7 +102,10 @@ export default function AdminLayout() {
         </div>
 
         {/* Tombol Keluar di Bagian Bawah */}
-        <button className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-xs font-medium text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-xs font-medium text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+        >
           🚪 Keluar
         </button>
       </aside>

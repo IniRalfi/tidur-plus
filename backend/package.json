@@ -17,7 +17,8 @@
     "@prisma/client": "^6.0.0",
     "@tidur-plus/shared": "workspace:*",
     "dotenv": "^17.4.2",
-    "elysia": "latest"
+    "elysia": "latest",
+    "jose": "^6.2.3"
   },
   "devDependencies": {
     "@types/bun": "latest",

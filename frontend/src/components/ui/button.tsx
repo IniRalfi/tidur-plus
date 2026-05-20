@@ -15,11 +15,6 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   size?: "default" | "sm" | "lg" | "icon";
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    
-    // Ini bagian Design System & Styling kamu!
     const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97]"
     
     const variants = {
@@ -36,9 +31,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-10 w-10",
     }
 
+export function buttonVariants({ variant = "default", size = "default", className = "" }: { variant?: keyof typeof variants, size?: keyof typeof sizes, className?: string } = {}) {
+  return cn(baseStyles, variants[variant], sizes[size], className);
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
+    
     return (
       <Comp
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
+        className={cn(buttonVariants({ variant, size }), className)}
         ref={ref}
         {...props}
       />

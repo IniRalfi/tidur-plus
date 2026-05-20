@@ -1,34 +1,55 @@
 // frontend/src/pages/admin/BukuPage.tsx
 import { useState } from "react";
-
-interface Buku {
-  id: string;
-  judul: string;
-  pengarang: string;
-  penerbit: string;
-  tahun: string;
-  stok: number;
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { bukuService } from "../../lib/buku.service";
+import { Buku } from "@tidur-plus/shared";
 
 export default function BukuPage() {
-  // 1. State data utama koleksi buku
-  const [dataBuku, setDataBuku] = useState<Buku[]>([
-    { id: "BK-001", judul: "Laskar Pelangi", pengarang: "Andrea Hirata", penerbit: "Bentang Pustaka", tahun: "2005", stok: 5 },
-    { id: "BK-002", judul: "Bumi Manusia", pengarang: "Pramoedya Ananta Toer", penerbit: "Hasta Mitra", tahun: "1980", stok: 3 },
-    { id: "BK-003", judul: "Negeri 5 Menara", pengarang: "Ahmad Fuadi", penerbit: "Gramedia", tahun: "2009", stok: 7 }
-  ]);
+  const queryClient = useQueryClient();
 
-  // 2. State untuk mengontrol Modal (Pop-up Form)
+  // 1. Fetch data dari backend
+  const { data: dataBuku = [], isLoading } = useQuery({
+    queryKey: ["buku"],
+    queryFn: bukuService.getAll,
+  });
+
+  // 2. Mutations untuk CRUD
+  const createMutation = useMutation({
+    mutationFn: bukuService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["buku"] });
+      setIsModalOpen(false);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<Buku> }) =>
+      bukuService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["buku"] });
+      setIsModalOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: bukuService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["buku"] });
+    },
+  });
+
+  // 3. State untuk mengontrol Modal (Pop-up Form)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  // 3. State untuk menangkap inputan Form
-  const [formBuku, setFormBuku] = useState<Omit<Buku, "id">>({
+  // 4. State untuk menangkap inputan Form
+  const [formBuku, setFormBuku] = useState<Partial<Buku>>({
     judul: "",
     pengarang: "",
     penerbit: "",
-    tahun: "",
-    stok: 0
+    tahun: new Date().getFullYear(),
+    stok: 0,
+    kategoriId: "", // butuh fetch kategori di real app
   });
   
   // State pembantu untuk mencatat ID buku mana yang sedang diedit
@@ -40,7 +61,7 @@ export default function BukuPage() {
   const handleOpenTambah = () => {
     setIsEditing(false);
     setSelectedId(null);
-    setFormBuku({ judul: "", pengarang: "", penerbit: "", tahun: "", stok: 1 });
+    setFormBuku({ judul: "", pengarang: "", penerbit: "", tahun: new Date().getFullYear(), stok: 1, kategoriId: "cly0u6n6p0000j2s8q7a7b8c9" /* placeholder kategori */ });
     setIsModalOpen(true);
   };
 
@@ -53,7 +74,8 @@ export default function BukuPage() {
       pengarang: buku.pengarang,
       penerbit: buku.penerbit,
       tahun: buku.tahun,
-      stok: buku.stok
+      stok: buku.stok,
+      kategoriId: buku.kategoriId,
     });
     setIsModalOpen(true);
   };
@@ -63,23 +85,16 @@ export default function BukuPage() {
     e.preventDefault();
 
     if (isEditing && selectedId) {
-      // PROSES UPDATE (U)
-      setDataBuku(prev => prev.map(item => 
-        item.id === selectedId ? { ...item, ...formBuku } : item
-      ));
+      updateMutation.mutate({ id: selectedId, data: formBuku });
     } else {
-      // PROSES CREATE (C)
-      const idBaru = `BK-00${dataBuku.length + 1}`;
-      setDataBuku(prev => [...prev, { id: idBaru, ...formBuku }]);
+      createMutation.mutate(formBuku);
     }
-
-    setIsModalOpen(false); // Tutup modal setelah simpan
   };
 
   // Fungsi Hapus Buku (D)
   const handleHapusBuku = (id: string) => {
     if (confirm("Apakah kamu yakin ingin menghapus buku ini?")) {
-      setDataBuku(prev => prev.filter(item => item.id !== id));
+      deleteMutation.mutate(id);
     }
   };
 
@@ -116,37 +131,47 @@ export default function BukuPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-              {dataBuku.map((buku) => (
-                <tr key={buku.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="py-4 px-5 font-mono font-medium text-slate-500">{buku.id}</td>
-                  <td className="py-4 px-5 font-semibold text-slate-900">{buku.judul}</td>
-                  <td className="py-4 px-5 text-slate-600 font-medium">{buku.pengarang}</td>
-                  <td className="py-4 px-5 text-slate-500">{buku.penerbit} ({buku.tahun})</td>
-                  <td className="py-4 px-5 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-md font-mono font-bold text-xs ${
-                      buku.stok > 3 ? "bg-slate-100 text-slate-700" : "bg-amber-50 text-amber-700 border border-amber-200"
-                    }`}>
-                      {buku.stok}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5 text-right">
-                    <div className="flex justify-end gap-1.5">
-                      <button 
-                        onClick={() => handleOpenEdit(buku)}
-                        className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button 
-                        onClick={() => handleHapusBuku(buku.id)}
-                        className="bg-white hover:bg-red-50 text-red-500 border border-slate-200 hover:border-red-200 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
-                      >
-                        🗑️ Hapus
-                      </button>
-                    </div>
-                  </td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400">Memuat data buku...</td>
                 </tr>
-              ))}
+              ) : dataBuku.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400">Belum ada koleksi buku</td>
+                </tr>
+              ) : (
+                dataBuku.map((buku) => (
+                  <tr key={buku.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-4 px-5 font-mono font-medium text-slate-500">{buku.id.substring(0, 8)}...</td>
+                    <td className="py-4 px-5 font-semibold text-slate-900">{buku.judul}</td>
+                    <td className="py-4 px-5 text-slate-600 font-medium">{buku.pengarang}</td>
+                    <td className="py-4 px-5 text-slate-500">{buku.penerbit || "-"} ({buku.tahun || "-"})</td>
+                    <td className="py-4 px-5 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded-md font-mono font-bold text-xs ${
+                        buku.stok > 3 ? "bg-slate-100 text-slate-700" : "bg-amber-50 text-amber-700 border border-amber-200"
+                      }`}>
+                        {buku.stok}
+                      </span>
+                    </td>
+                    <td className="py-4 px-5 text-right">
+                      <div className="flex justify-end gap-1.5">
+                        <button 
+                          onClick={() => handleOpenEdit(buku)}
+                          className="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button 
+                          onClick={() => handleHapusBuku(buku.id)}
+                          className="bg-white hover:bg-red-50 text-red-500 border border-slate-200 hover:border-red-200 px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer"
+                        >
+                          🗑️ Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -200,7 +225,6 @@ export default function BukuPage() {
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Penerbit</label>
                   <input 
                     type="text" 
-                    required
                     value={formBuku.penerbit}
                     onChange={(e) => setFormBuku({ ...formBuku, penerbit: e.target.value })}
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-slate-400 text-slate-800"
@@ -211,13 +235,24 @@ export default function BukuPage() {
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tahun Terbit</label>
                   <input 
                     type="number" 
-                    required
-                    value={formBuku.tahun}
-                    onChange={(e) => setFormBuku({ ...formBuku, tahun: e.target.value })}
+                    value={formBuku.tahun || ""}
+                    onChange={(e) => setFormBuku({ ...formBuku, tahun: parseInt(e.target.value) || 0 })}
                     className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-slate-400 text-slate-800"
                     placeholder="1980"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">Kategori ID</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formBuku.kategoriId}
+                  onChange={(e) => setFormBuku({ ...formBuku, kategoriId: e.target.value })}
+                  className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-slate-400 text-slate-800"
+                  placeholder="ID Kategori (sementara manual)"
+                />
               </div>
 
               <div>
@@ -243,7 +278,8 @@ export default function BukuPage() {
                 </button>
                 <button 
                   type="submit"
-                  className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-medium cursor-pointer shadow-xs"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                  className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-medium cursor-pointer shadow-xs disabled:opacity-50"
                 >
                   {isEditing ? "Perbarui Data" : "Tambahkan Buku"}
                 </button>

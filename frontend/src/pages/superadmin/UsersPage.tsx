@@ -1,94 +1,25 @@
 import { useState, useMemo } from "react";
-
-// Type Role
-type Role = "super_admin" | "admin" | "anggota";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  role: Role;
-  status: "aktif" | "nonaktif";
-  joinedAt: string;
-}
-
-// Data Dummy
-const DUMMY_USERS: User[] = [
-  {
-    id: "1",
-    name: "Rafli ",
-    email: "rafli@tidurplus.id",
-    role: "super_admin",
-    status: "aktif",
-    joinedAt: "2024-01-10",
-  },
-  {
-    id: "2",
-    name: "Cello",
-    email: "marcel@tidurplus.id",
-    role: "admin",
-    status: "aktif",
-    joinedAt: "2024-01-12",
-  },
-  {
-    id: "3",
-    name: "Nanad",
-    email: "nadya@gmail.com",
-    role: "admin",
-    status: "aktif",
-    joinedAt: "2024-02-01",
-  },
-  {
-    id: "4",
-    name: "Sheren",
-    email: "sheren@gmail.com",
-    role: "anggota",
-    status: "aktif",
-    joinedAt: "2024-02-14",
-  },
-  {
-    id: "5",
-    name: "Timo",
-    email: "timo@gmail.com",
-    role: "anggota",
-    status: "aktif",
-    joinedAt: "2024-03-01",
-  },
-  {
-    id: "6",
-    name: "Bila",
-    email: "bila@gmail.com",
-    role: "anggota",
-    status: "nonaktif",
-    joinedAt: "2024-03-05",
-  },
-  {
-    id: "7",
-    name: "Nomnom",
-    email: "naomy@gmail.com",
-    role: "anggota",
-    status: "aktif",
-    joinedAt: "2024-03-10",
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { usersService } from "../../lib/users.service";
+import { User, Role } from "@tidur-plus/shared";
 
 const ROLE_LABELS: Record<Role, string> = {
-  super_admin: "Super Admin",
-  admin: "Admin",
-  anggota: "Anggota",
+  [Role.SUPER_ADMIN]: "Super Admin",
+  [Role.ADMIN]: "Admin",
+  [Role.ANGGOTA]: "Anggota",
 };
 
 const ROLE_COLORS: Record<Role, string> = {
-  super_admin:
+  [Role.SUPER_ADMIN]:
     "bg-[#eb6935]/10 text-[#d33a27] border border-[#eb6935]/30",
-  admin:
+  [Role.ADMIN]:
     "bg-[#a18e62]/15 text-[#5e432f] border border-[#a18e62]/40",
-  anggota:
+  [Role.ANGGOTA]:
     "bg-[#838055]/10 text-[#5d583e] border border-[#838055]/30",
 };
 
 function getInitials(name: string) {
+  if (!name) return "U";
   return name
     .split(" ")
     .slice(0, 2)
@@ -107,35 +38,36 @@ function formatDate(dateStr: string) {
 
 // Sub-components
 interface RoleBadgeProps {
-  role: Role;
+  roles: string[];
 }
-function RoleBadge({ role }: RoleBadgeProps) {
+function RoleBadge({ roles }: RoleBadgeProps) {
+  const role = (roles && roles.length > 0 ? roles[0] : Role.ANGGOTA) as Role;
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-inter-medium ${ROLE_COLORS[role]}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-inter-medium ${ROLE_COLORS[role] || ROLE_COLORS[Role.ANGGOTA]}`}
     >
-      {ROLE_LABELS[role]}
+      {ROLE_LABELS[role] || role}
     </span>
   );
 }
 
 interface StatusBadgeProps {
-  status: "aktif" | "nonaktif";
+  status: boolean;
 }
 function StatusBadgeUser({ status }: StatusBadgeProps) {
   return (
     <span
       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-inter-medium ${
-        status === "aktif"
+        status
           ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
           : "bg-zinc-100 text-zinc-500 border border-zinc-200"
       }`}>
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          status === "aktif" ? "bg-emerald-500" : "bg-zinc-400"
+          status ? "bg-emerald-500" : "bg-zinc-400"
         }`}
       />
-      {status === "aktif" ? "Aktif" : "Nonaktif"}
+      {status ? "Aktif" : "Nonaktif"}
     </span>
   );
 }
@@ -144,15 +76,15 @@ function StatusBadgeUser({ status }: StatusBadgeProps) {
 interface EditModalProps {
   user: User;
   onClose: () => void;
-  onSave: (updated: User) => void;
+  onSave: (id: string, role: string, aktif: boolean) => void;
 }
 
 function EditModal({ user, onClose, onSave }: EditModalProps) {
-  const [role, setRole] = useState<Role>(user.role);
-  const [status, setStatus] = useState(user.status);
+  const [role, setRole] = useState<string>(user.roles[0] || Role.ANGGOTA);
+  const [status, setStatus] = useState(user.aktif);
 
   function handleSave() {
-    onSave({ ...user, role, status });
+    onSave(user.id, role, status);
     onClose();
   }
 
@@ -177,10 +109,10 @@ function EditModal({ user, onClose, onSave }: EditModalProps) {
           {/* User info (read-only) */}
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-[#eb6935]/10 flex items-center justify-center text-[#d33a27] font-inter-bold text-sm flex-shrink-0">
-              {getInitials(user.name)}
+              {getInitials(user.nama)}
             </div>
             <div>
-              <p className="font-inter-medium text-[#5e432f] text-sm">{user.name}</p>
+              <p className="font-inter-medium text-[#5e432f] text-sm">{user.nama}</p>
               <p className="text-xs text-[#a18e62]">{user.email}</p>
             </div>
           </div>
@@ -190,12 +122,12 @@ function EditModal({ user, onClose, onSave }: EditModalProps) {
             <label className="text-xs font-inter-medium text-[#814524]">Role</label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full border border-[#d27d3f]/30 rounded-xl px-3 py-2 text-sm text-[#5e432f] bg-white focus:outline-none focus:ring-2 focus:ring-[#eb6935]/30 focus:border-[#eb6935] transition-all"
             >
-              <option value="anggota">Anggota</option>
-              <option value="admin">Admin</option>
-              <option value="super_admin">Super Admin</option>
+              <option value={Role.ANGGOTA}>Anggota</option>
+              <option value={Role.ADMIN}>Admin</option>
+              <option value={Role.SUPER_ADMIN}>Super Admin</option>
             </select>
           </div>
 
@@ -203,19 +135,19 @@ function EditModal({ user, onClose, onSave }: EditModalProps) {
           <div className="space-y-1.5">
             <label className="text-xs font-inter-medium text-[#814524]">Status</label>
             <div className="flex gap-3">
-              {(["aktif", "nonaktif"] as const).map((s) => (
+              {[true, false].map((s) => (
                 <button
-                  key={s}
+                  key={s ? "aktif" : "nonaktif"}
                   onClick={() => setStatus(s)}
                   className={`flex-1 py-2 rounded-xl text-sm font-inter-medium border transition-all ${
                     status === s
-                      ? s === "aktif"
+                      ? s
                         ? "bg-emerald-50 text-emerald-700 border-emerald-300"
                         : "bg-zinc-100 text-zinc-600 border-zinc-300"
                       : "bg-white text-[#a18e62] border-[#d27d3f]/20 hover:border-[#d27d3f]/40"
                   }`}
                 >
-                  {s === "aktif" ? "Aktif" : "Nonaktif"}
+                  {s ? "Aktif" : "Nonaktif"}
                 </button>
               ))}
             </div>
@@ -246,7 +178,7 @@ function EditModal({ user, onClose, onSave }: EditModalProps) {
 interface DeleteModalProps {
   user: User;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (id: string) => void;
 }
 function DeleteModal({ user, onClose, onConfirm }: DeleteModalProps) {
   return (
@@ -261,7 +193,7 @@ function DeleteModal({ user, onClose, onConfirm }: DeleteModalProps) {
           <div>
             <h3 className="font-inter-bold text-[#5e432f] text-base">Hapus User?</h3>
             <p className="text-sm text-[#a18e62] mt-1">
-              <span className="font-inter-medium text-[#814524]">{user.name}</span> akan dihapus dari sistem. Tindakan ini tidak bisa dibatalkan.
+              <span className="font-inter-medium text-[#814524]">{user.nama}</span> akan dihapus dari sistem. Tindakan ini tidak bisa dibatalkan.
             </p>
           </div>
         </div>
@@ -273,7 +205,7 @@ function DeleteModal({ user, onClose, onConfirm }: DeleteModalProps) {
             Batal
           </button>
           <button
-            onClick={() => { onConfirm(); onClose(); }}
+            onClick={() => { onConfirm(user.id); onClose(); }}
             className="flex-1 py-2 rounded-xl text-sm text-white bg-red-500 hover:bg-red-600 transition-all font-inter-medium"
           >
             Hapus
@@ -286,21 +218,46 @@ function DeleteModal({ user, onClose, onConfirm }: DeleteModalProps) {
 
 // Main Page
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(DUMMY_USERS);
+  const queryClient = useQueryClient();
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["all-users"],
+    queryFn: usersService.getAllUsers,
+  });
+
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState<Role | "semua">("semua");
+  const [filterRole, setFilterRole] = useState<string | "semua">("semua");
   const [filterStatus, setFilterStatus] = useState<"semua" | "aktif" | "nonaktif">("semua");
   const [editUser, setEditUser] = useState<User | null>(null);
   const [deleteUser, setDeleteUser] = useState<User | null>(null);
+
+  const updateRoleMutation = useMutation({
+    mutationFn: ({ id, role }: { id: string; role: string }) => usersService.updateRole(id, role),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["all-users"] }),
+  });
+
+  const toggleAktifMutation = useMutation({
+    mutationFn: (id: string) => usersService.toggleAktif(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["all-users"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => usersService.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["all-users"] }),
+  });
 
   // Filter & Search
   const filtered = useMemo(() => {
     return users.filter((u) => {
       const matchSearch =
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
+        u.nama?.toLowerCase().includes(search.toLowerCase()) ||
         u.email.toLowerCase().includes(search.toLowerCase());
-      const matchRole = filterRole === "semua" || u.role === filterRole;
-      const matchStatus = filterStatus === "semua" || u.status === filterStatus;
+      
+      const role = u.roles[0] || "ANGGOTA";
+      const matchRole = filterRole === "semua" || role === filterRole;
+      
+      const status = u.aktif ? "aktif" : "nonaktif";
+      const matchStatus = filterStatus === "semua" || status === filterStatus;
+      
       return matchSearch && matchRole && matchStatus;
     });
   }, [users, search, filterRole, filterStatus]);
@@ -308,18 +265,25 @@ export default function UsersPage() {
   // Stats
   const stats = useMemo(() => ({
     total: users.length,
-    admin: users.filter((u) => u.role === "admin" || u.role === "super_admin").length,
-    anggota: users.filter((u) => u.role === "anggota").length,
-    nonaktif: users.filter((u) => u.status === "nonaktif").length,
+    admin: users.filter((u) => u.roles.includes(Role.ADMIN) || u.roles.includes(Role.SUPER_ADMIN)).length,
+    anggota: users.filter((u) => u.roles.includes(Role.ANGGOTA) || !u.roles.length).length,
+    nonaktif: users.filter((u) => !u.aktif).length,
   }), [users]);
 
   // Handlers
-  function handleSaveEdit(updated: User) {
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+  function handleSaveEdit(id: string, role: string, aktif: boolean) {
+    updateRoleMutation.mutate({ id, role });
+    // Assuming toggleAktif should only be called if status changes, 
+    // but for simplicity we can just rely on the modal state.
+    // Ideally we would compare with the previous state or have a combined endpoint.
+    const user = users.find(u => u.id === id);
+    if (user && user.aktif !== aktif) {
+      toggleAktifMutation.mutate(id);
+    }
   }
 
   function handleDelete(id: string) {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    deleteMutation.mutate(id);
   }
 
   // Render
@@ -372,13 +336,13 @@ export default function UsersPage() {
         {/* Filter Role */}
         <select
           value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value as Role | "semua")}
+          onChange={(e) => setFilterRole(e.target.value as string)}
           className="px-4 py-2 text-sm border border-[#d27d3f]/20 rounded-xl bg-white text-[#5e432f] focus:outline-none focus:ring-2 focus:ring-[#eb6935]/20 focus:border-[#eb6935]/50 transition-all"
         >
           <option value="semua">Semua Role</option>
-          <option value="super_admin">Super Admin</option>
-          <option value="admin">Admin</option>
-          <option value="anggota">Anggota</option>
+          <option value={Role.SUPER_ADMIN}>Super Admin</option>
+          <option value={Role.ADMIN}>Admin</option>
+          <option value={Role.ANGGOTA}>Anggota</option>
         </select>
 
         {/* Filter Status */}
@@ -420,26 +384,26 @@ export default function UsersPage() {
               {/* User info */}
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-full bg-[#eb6935]/10 flex items-center justify-center text-[#d33a27] font-inter-bold text-xs flex-shrink-0">
-                  {getInitials(user.name)}
+                  {getInitials(user.nama)}
                 </div>
                 <div className="min-w-0">
-                  <p className="font-inter-medium text-[#5e432f] text-sm truncate">{user.name}</p>
+                  <p className="font-inter-medium text-[#5e432f] text-sm truncate">{user.nama}</p>
                   <p className="text-xs text-[#a18e62] truncate">{user.email}</p>
                 </div>
               </div>
 
               {/* Role */}
               <div>
-                <RoleBadge role={user.role} />
+                <RoleBadge roles={user.roles} />
               </div>
 
               {/* Status */}
               <div>
-                <StatusBadgeUser status={user.status} />
+                <StatusBadgeUser status={user.aktif} />
               </div>
 
               {/* Joined */}
-              <div className="text-xs text-[#a18e62]">{formatDate(user.joinedAt)}</div>
+              <div className="text-xs text-[#a18e62]">{formatDate(user.createdAt?.toString() || new Date().toISOString())}</div>
 
               {/* Actions */}
               <div className="flex items-center gap-2">
@@ -456,7 +420,7 @@ export default function UsersPage() {
                   onClick={() => setDeleteUser(user)}
                   title="Hapus user"
                   className="p-1.5 rounded-lg text-[#a18e62] hover:text-red-500 hover:bg-red-50 transition-all"
-                  disabled={user.role === "super_admin"}
+                  disabled={user.roles.includes(Role.SUPER_ADMIN)}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

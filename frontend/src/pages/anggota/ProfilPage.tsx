@@ -1,15 +1,34 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/authStore';
+
+import { queryClient } from "../../lib/query-client";
 
 export default function ProfilPage() {
-  const [currentUser] = useState({
-    name: "Upin",
-    email: "upin@student.untan.ac.id",
-    avatarUrl: "https://i.pinimg.com/1200x/b1/28/06/b128063075048888e07d7eba24d9de5c.jpg",
-    role: "ANGGOTA",
-    idAnggota: "LIB-2026-UPIN-001",
-    dendaAktif: "Rp 0",
-    bukuDipinjam: 2 
-  });
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+  
+  const handleLogout = () => {
+    queryClient.clear();
+    logout();
+    navigate("/login");
+  };
+
+  const currentUser = {
+    name: user?.nama || "Anggota",
+    email: user?.email || "",
+    avatarUrl: user?.foto || "https://api.dicebear.com/9.x/fun-emoji/svg?seed=Rafli",
+    role: user?.roles?.[0] || "ANGGOTA",
+    idAnggota: `LIB-2026-${user?.id?.substring(0, 4)?.toUpperCase() || "001"}`,
+    dendaAktif: "Rp 0", // Ini bisa didapat dari endpoint jika nanti ada
+    bukuDipinjam: 0, // Ini bisa didapat dari endpoint jika nanti ada
+    bergabungSejak: user?.createdAt ? new Date(user.createdAt).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }) : "Sekarang",
+    status: user?.aktif ? "Aktif" : "Non-aktif"
+  };
 
   return (
     <div className="min-h-screen py-10 px-4 font-sans" style={{ backgroundColor: '#fdfcfb' }}>
@@ -54,7 +73,7 @@ export default function ProfilPage() {
                 <div>
                   <div className="text-[11px] text-slate-400 uppercase">ID Register</div>
                   <div className="text-xl font-black font-mono tracking-wide text-slate-900">{currentUser.idAnggota}</div>
-                  <div className="text-[10px] text-slate-400 mt-1">Bergabung Sejak: 1 Mei 2026</div>
+                  <div className="text-[10px] text-slate-400 mt-1">Bergabung Sejak: {currentUser.bergabungSejak}</div>
                 </div>
               </div>
 
@@ -75,8 +94,11 @@ export default function ProfilPage() {
                   <div>Denda Aktif: <span className="font-mono">{currentUser.dendaAktif}</span></div>
                 </div>
 
-                <button className="w-full py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 cursor-pointer text-center"
-                        style={{ backgroundColor: 'var(--color-sun-glow)' }}>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 cursor-pointer text-center"
+                  style={{ backgroundColor: 'var(--color-sun-glow)' }}
+                >
                   Keluar Akun
                 </button>
               </div>

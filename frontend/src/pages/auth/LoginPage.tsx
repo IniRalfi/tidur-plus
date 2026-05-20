@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { Eye, EyeOff, LogIn, BookOpen } from "lucide-react";
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate, useLocation } from "react-router-dom"; 
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authService } from "../../lib/auth.service";
+import { useAuthStore } from "../../stores/authStore";
+import { Role } from "@tidur-plus/shared";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setUser } = useAuthStore();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,11 +27,33 @@ export default function LoginPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    setErrorMsg("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Proses Login:", formData);
+    setIsLoading(true);
+    setErrorMsg("");
+    try {
+      const user = await authService.login(formData.email, formData.password);
+      setUser(user);
+      
+      let from = location.state?.from?.pathname || "/";
+      
+      // Jika dari root, atau admin mencoba masuk ke dashboard anggota, arahkan ke dashboard yang benar
+      if (from === "/" || (from === "/dashboard" && !user.roles.includes(Role.ANGGOTA as Role))) {
+        if (user.roles.includes(Role.SUPER_ADMIN as Role)) navigate("/superadmin", { replace: true });
+        else if (user.roles.includes(Role.ADMIN as Role)) navigate("/admin/dashboard", { replace: true });
+        else navigate("/dashboard", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
+      
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || "Email atau password salah");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

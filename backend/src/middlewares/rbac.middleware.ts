@@ -1,7 +1,23 @@
-import { Role } from '@tidur-plus/shared'
+import { Elysia } from "elysia";
+import { Role } from "@tidur-plus/shared";
+import { errorResponse } from "../utils/response";
+import { authMiddleware } from "./auth.middleware";
 
-// TODO: Guard berdasarkan role
+// Guard berdasarkan role
 // Contoh penggunaan: .use(requireRole(Role.ADMIN))
-export function requireRole(...roles: Role[]) {
-  return roles
+export function requireRole(...allowedRoles: Role[]) {
+  return new Elysia({ name: "require-role" })
+    .use(authMiddleware)
+    .onBeforeHandle(({ user, set }: any) => {
+      if (!user) {
+        set.status = 401;
+        return errorResponse("Unauthorized", 401);
+      }
+
+      const hasRole = user.roles.some((role: string) => allowedRoles.includes(role as Role));
+      if (!hasRole) {
+        set.status = 403;
+        return errorResponse("Forbidden: Akses ditolak", 403);
+      }
+    });
 }

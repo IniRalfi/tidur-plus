@@ -5,23 +5,38 @@ export default function CallbackPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const mockUser = {
-      name: "Upin",
-      email: "upin@student.untan.ac.id",
-      avatarUrl: "https://i.pinimg.com/1200x/b1/28/06/b128063075048888e07d7eba24d9de5c.jpg", 
-      role: "ANGGOTA",
-      idAnggota: "LIB-2026-UPIN-001",
-      dendaAktif: "Rp 0",
-      bukuDipinjam: 2
+    const processOAuth = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get("accessToken");
+      const refreshToken = urlParams.get("refreshToken");
+
+      if (accessToken && refreshToken) {
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+
+        try {
+          // Import axios atau panggil service getMe
+          // karena kita butuh authService dari context/store
+          // atau bisa pakai dari lib
+          const { authService } = await import("../../lib/auth.service");
+          const { useAuthStore } = await import("../../stores/authStore");
+          
+          const user = await authService.getMe();
+          useAuthStore.getState().setUser(user);
+          
+          if (user.roles.includes("SUPER_ADMIN" as any)) navigate("/superadmin", { replace: true });
+          else if (user.roles.includes("ADMIN" as any)) navigate("/admin/dashboard", { replace: true });
+          else navigate("/dashboard", { replace: true });
+        } catch (error) {
+          console.error("Gagal verifikasi token:", error);
+          navigate("/login");
+        }
+      } else {
+        navigate("/login");
+      }
     };
 
-    localStorage.setItem("user_session", JSON.stringify(mockUser));
-
-    const timer = setTimeout(() => {
-      navigate("/profil");
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    processOAuth();
   }, [navigate]);
 
   return (

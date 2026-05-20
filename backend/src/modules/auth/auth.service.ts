@@ -150,6 +150,43 @@ export const authService = {
     if (!user) throw new Error("NOT_FOUND");
     return user;
   },
+
+  // Fungsi internal untuk Google OAuth
+  handleGoogleUser: async (googleData: { email: string; nama: string; googleId: string; foto?: string }) => {
+    let user = await prisma.user.findUnique({ where: { email: googleData.email } });
+
+    if (user) {
+      // Update data jika perlu
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          googleId: googleData.googleId,
+          foto: googleData.foto || user.foto,
+        }
+      });
+    } else {
+      // Register baru via Google
+      user = await prisma.user.create({
+        data: {
+          email: googleData.email,
+          nama: googleData.nama,
+          googleId: googleData.googleId,
+          foto: googleData.foto,
+          roles: ["ANGGOTA"],
+        }
+      });
+    }
+
+    if (!user.aktif) throw new Error("ACCOUNT_INACTIVE");
+
+    const { accessToken, refreshToken } = await signTokens({
+      sub: user.id,
+      email: user.email,
+      roles: user.roles,
+    });
+
+    return { user, accessToken, refreshToken };
+  },
 };
 
 // ─── Internal: sign access + refresh token ────────────────────────────────────

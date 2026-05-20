@@ -21,5 +21,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       refreshToken: t.String(),
     }),
   })
+  .get("/google", authController.googleLogin)
+  .get("/google/callback", authController.googleCallback)
   .use(requireAuth)
   .get("/me", authController.getMe);

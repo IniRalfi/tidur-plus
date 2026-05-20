@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -20,7 +19,6 @@
   },
   "include": ["src", "vite-env.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
-=======
     // Environment setup & latest features
     "lib": ["ESNext", "DOM"],
     "target": "ESNext",
@@ -54,5 +52,4 @@
   },
 
   "exclude": ["dist", "node_modules"]
->>>>>>> backend
 }

@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: konfigurasi routes\nexport {}
-=======
 import { Elysia, t } from "elysia";
 import { konfigurasiController } from "./konfigurasi.controller";
 
@@ -14,4 +11,3 @@ export const konfigurasiRoutes = new Elysia()
       maxPerpanjangan: t.Optional(t.Number()),
     }),
   });
->>>>>>> backend

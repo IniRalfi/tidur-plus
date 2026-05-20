@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-// TODO: perpanjangan service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
 export const perpanjanganService = {
   // Get semua perpanjangan
-  getAll: async (params: {
-    page?: number;
-    limit?: number;
-    status?: string;
-  }) => {
+  getAll: async (params: { page?: number; limit?: number; status?: string }) => {
     const { page = 1, limit = 10, status } = params;
     const { take, skip } = getPagination(page, limit);
 
@@ -75,8 +68,7 @@ export const perpanjanganService = {
 
     if (!peminjaman) throw new Error("NOT_FOUND");
 
-    if (peminjaman.status !== "DIPINJAM")
-      throw new Error("INVALID_STATUS");
+    if (peminjaman.status !== "DIPINJAM") throw new Error("INVALID_STATUS");
 
     const config = await prisma.konfigurasi.findFirst();
     const maxPerpanjangan = config?.maxPerpanjangan ?? 2;
@@ -87,9 +79,7 @@ export const perpanjanganService = {
     }
 
     // Cek ada yang masih MENUNGGU
-    const adaMenunggu = peminjaman.perpanjangan.some(
-      (p) => p.status === "MENUNGGU"
-    );
+    const adaMenunggu = peminjaman.perpanjangan.some((p: any) => p.status === "MENUNGGU");
 
     if (adaMenunggu) throw new Error("SUDAH_DIAJUKAN");
 
@@ -118,17 +108,13 @@ export const perpanjanganService = {
 
     if (!perpanjangan) throw new Error("NOT_FOUND");
 
-    if (perpanjangan.status !== "MENUNGGU")
-      throw new Error("INVALID_STATUS");
+    if (perpanjangan.status !== "MENUNGGU") throw new Error("INVALID_STATUS");
 
-    const batasKembaliLama =
-      perpanjangan.peminjaman.batasKembali ?? new Date();
+    const batasKembaliLama = perpanjangan.peminjaman.batasKembali ?? new Date();
 
     const batasKembaliBaru = new Date(batasKembaliLama);
 
-    batasKembaliBaru.setDate(
-      batasKembaliBaru.getDate() + perpanjangan.jumlahHari
-    );
+    batasKembaliBaru.setDate(batasKembaliBaru.getDate() + perpanjangan.jumlahHari);
 
     const [updated] = await prisma.$transaction([
       prisma.perpanjangan.update({
@@ -172,8 +158,7 @@ export const perpanjanganService = {
 
     if (!perpanjangan) throw new Error("NOT_FOUND");
 
-    if (perpanjangan.status !== "MENUNGGU")
-      throw new Error("INVALID_STATUS");
+    if (perpanjangan.status !== "MENUNGGU") throw new Error("INVALID_STATUS");
 
     return await prisma.perpanjangan.update({
       where: { id },
@@ -191,4 +176,3 @@ export const perpanjanganService = {
     });
   },
 };
->>>>>>> backend

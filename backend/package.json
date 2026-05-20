@@ -1,6 +1,5 @@
 {
   "name": "@tidur-plus/backend",
-<<<<<<< HEAD
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,10 +12,11 @@
     "db:studio": "bunx prisma studio"
   },
   "dependencies": {
-    "@tidur-plus/shared": "workspace:*",
     "@elysiajs/cors": "latest",
     "@elysiajs/jwt": "latest",
     "@prisma/client": "^6.0.0",
+    "@tidur-plus/shared": "workspace:*",
+    "dotenv": "^17.4.2",
     "elysia": "latest"
   },
   "devDependencies": {
@@ -25,19 +25,3 @@
     "typescript": "^5.6.3"
   }
 }
-=======
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "bun run src/index.ts",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "bun run prisma/seed.ts",
-    "db:studio": "prisma studio"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.0.0",
-    "elysia": "^1.4.28",
-    "prisma": "^6.0.0"
-  }
-}
->>>>>>> backend

@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: users routes\nexport {}
-=======
 import { Elysia, t } from "elysia";
 import { usersController } from "./users.controller";
 
@@ -28,4 +25,3 @@ export const usersRoutes = new Elysia()
       foto: t.Optional(t.String()),
     }),
   });
->>>>>>> backend

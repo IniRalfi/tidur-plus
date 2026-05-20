@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: konfigurasi service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 
 export const konfigurasiService = {
@@ -57,4 +54,3 @@ export const konfigurasiService = {
     });
   },
 };
->>>>>>> backend

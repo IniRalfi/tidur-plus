@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: perpanjangan routes\nexport {}
-=======
 import { Elysia, t } from "elysia";
 import { perpanjanganController } from "./perpanjangan.controller";
 
@@ -8,23 +5,12 @@ export const perpanjanganRoutes = new Elysia()
   // ===========================
   // ANGGOTA
   // ===========================
-  .get(
-    "/peminjaman/perpanjangan/:peminjamanId",
-    perpanjanganController.getByPeminjaman
-  )
-  .post(
-    "/peminjaman/perpanjangan/:peminjamanId",
-    perpanjanganController.create,
-    {
-      body: t.Object({
-        jumlahHari: t.Union([
-          t.Literal(1),
-          t.Literal(2),
-          t.Literal(3),
-        ]),
-      }),
-    }
-  )
+  .get("/peminjaman/perpanjangan/:peminjamanId", perpanjanganController.getByPeminjaman)
+  .post("/peminjaman/perpanjangan/:peminjamanId", perpanjanganController.create, {
+    body: t.Object({
+      jumlahHari: t.Union([t.Literal(1), t.Literal(2), t.Literal(3)]),
+    }),
+  })
 
   // ===========================
   // ADMIN
@@ -38,7 +24,6 @@ export const perpanjanganRoutes = new Elysia()
   })
   .patch("/admin/perpanjangan/:id/tolak", perpanjanganController.tolak, {
     body: t.Object({
-      adminId: t.String(), 
+      adminId: t.String(),
     }),
   });
->>>>>>> backend

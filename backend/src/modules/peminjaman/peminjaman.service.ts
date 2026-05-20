@@ -1,17 +1,9 @@
-<<<<<<< HEAD
-// TODO: peminjaman service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
 export const peminjamanService = {
   // Get semua peminjaman
-  getAll: async (params: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    userId?: string;
-  }) => {
+  getAll: async (params: { page?: number; limit?: number; status?: string; userId?: string }) => {
     const { page = 1, limit = 10, status, userId } = params;
     const { take, skip } = getPagination(page, limit);
 
@@ -57,10 +49,7 @@ export const peminjamanService = {
   },
 
   // Get peminjaman by user
-  getByUser: async (
-    userId: string,
-    params: { page?: number; limit?: number; status?: string }
-  ) => {
+  getByUser: async (userId: string, params: { page?: number; limit?: number; status?: string }) => {
     const { page = 1, limit = 10, status } = params;
     const { take, skip } = getPagination(page, limit);
 
@@ -114,13 +103,12 @@ export const peminjamanService = {
     if (totalAktif >= 2) throw new Error("BATAS_PINJAM");
 
     const dendaBelumLunas = await prisma.denda.findFirst({
-        where: {
+      where: {
         peminjaman: { userId },
         status: "BELUM_LUNAS",
-        },
+      },
     });
     if (dendaBelumLunas) throw new Error("ADA_DENDA");
-
 
     // Ambil konfigurasi durasi pinjam
     const config = await prisma.konfigurasi.findFirst();
@@ -201,11 +189,10 @@ export const peminjamanService = {
     if (peminjaman.batasKembali && tanggalKembali > peminjaman.batasKembali) {
       const config = await prisma.konfigurasi.findFirst();
       const tarifPerHari = config?.tarifDenda ?? 1000;
-      const selisihMs =
-        tanggalKembali.getTime() - peminjaman.batasKembali.getTime();
+      const selisihMs = tanggalKembali.getTime() - peminjaman.batasKembali.getTime();
       const selisihHari = Math.ceil(selisihMs / (1000 * 60 * 60 * 24));
       const jumlahDenda = selisihHari * tarifPerHari;
-      
+
       denda = await prisma.denda.create({
         data: {
           peminjamanId: id,
@@ -226,4 +213,3 @@ export const peminjamanService = {
     return { peminjaman: updated, denda };
   },
 };
->>>>>>> backend

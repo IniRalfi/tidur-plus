@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: kategori service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 
 export const kategoriService = {
@@ -51,4 +48,3 @@ export const kategoriService = {
     });
   },
 };
->>>>>>> backend

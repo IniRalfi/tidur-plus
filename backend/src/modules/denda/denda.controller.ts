@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-// TODO: denda controller\nexport {}
-=======
 import { dendaService } from "./denda.service";
-import {
-  successResponse,
-  errorResponse,
-  paginatedResponse,
-} from "../../utils/response";
+import { successResponse, errorResponse, paginatedResponse } from "../../utils/response";
 
 export const dendaController = {
   // GET /api/denda
@@ -44,14 +37,10 @@ export const dendaController = {
     }
   },
 
-  // GET /api/denda/peminjaman/:peminjamanId
-  getByPeminjaman: async ({
-    params,
-  }: {
-    params: { peminjamanId: string };
-  }) => {
+  // GET /api/denda/peminjaman/:id
+  getByPeminjaman: async ({ params }: { params: { id: string } }) => {
     try {
-      const data = await dendaService.getByPeminjaman(params.peminjamanId);
+      const data = await dendaService.getByPeminjaman(params.id);
       if (!data) return errorResponse("Denda tidak ditemukan", 404);
       return successResponse(data, "Berhasil mengambil denda");
     } catch (error) {
@@ -95,12 +84,9 @@ export const dendaController = {
       const data = await dendaService.lunas(params.id);
       return successResponse(data, "Denda berhasil ditandai lunas");
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("Denda tidak ditemukan", 404);
-      if (error.message === "SUDAH_LUNAS")
-        return errorResponse("Denda sudah lunas", 400);
+      if (error.message === "NOT_FOUND") return errorResponse("Denda tidak ditemukan", 404);
+      if (error.message === "SUDAH_LUNAS") return errorResponse("Denda sudah lunas", 400);
       return errorResponse("Gagal menandai denda lunas");
     }
   },
 };
->>>>>>> backend

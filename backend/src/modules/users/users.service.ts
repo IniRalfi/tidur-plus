@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: users service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
@@ -10,12 +7,7 @@ const checkRole = (_role: string) => true;
 
 export const usersService = {
   // Get semua user
-  getAll: async (params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    role?: string;
-  }) => {
+  getAll: async (params: { page?: number; limit?: number; search?: string; role?: string }) => {
     const { page = 1, limit = 10, search, role } = params;
     const { take, skip } = getPagination(page, limit);
 
@@ -43,7 +35,7 @@ export const usersService = {
           nama: true,
           email: true,
           foto: true,
-          roles: true,      // ← array of role
+          roles: true, // ← array of role
           aktif: true,
           createdAt: true,
           updatedAt: true,
@@ -86,10 +78,7 @@ export const usersService = {
   },
 
   // Update profil user
-  updateProfil: async (
-    id: string,
-    body: { nama?: string; foto?: string }
-  ) => {
+  updateProfil: async (id: string, body: { nama?: string; foto?: string }) => {
     return await prisma.user.update({
       where: { id },
       data: body,
@@ -124,7 +113,7 @@ export const usersService = {
         where: { id: userId },
         data: {
           roles: {
-            set: user.roles.filter((r) => r !== role),
+            set: user.roles.filter((r: any) => r !== role),
           },
         },
         select: {
@@ -203,4 +192,3 @@ export const usersService = {
     return user?.roles.includes(role as any) ?? false;
   },
 };
->>>>>>> backend

@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: konfigurasi controller\nexport {}
-=======
 import { konfigurasiService } from "./konfigurasi.service";
 import { successResponse, errorResponse } from "../../utils/response";
 
@@ -41,4 +38,3 @@ export const konfigurasiController = {
     }
   },
 };
->>>>>>> backend

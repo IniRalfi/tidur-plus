@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: buku routes\nexport {}
-=======
 import { Elysia, t } from "elysia";
 import { bukuController } from "./buku.controller";
 
@@ -37,4 +34,3 @@ export const bukuRoutes = new Elysia()
     }),
   })
   .delete("/admin/buku/:id", bukuController.delete);
->>>>>>> backend

@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-import { Elysia } from 'elysia'
-import { cors } from '@elysiajs/cors'
-import { corsConfig } from './config/cors.config'
-import { appConfig } from './config/app.config'
-
-const app = new Elysia()
-  .use(cors(corsConfig))
-  .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
-
-app.listen(appConfig.port, () => {
-  console.log(`🚀 Backend running at http://localhost:${appConfig.port}`)
-})
-=======
 import { Elysia } from "elysia";
 import { kategoriRoutes } from "./modules/kategori/kategori.routes";
 import { bukuRoutes } from "./modules/buku/buku.routes";
@@ -35,9 +21,6 @@ const app = new Elysia()
   .use(konfigurasiRoutes)
   .listen(process.env.PORT ?? 3000);
 
-console.log(
-  `🚀 Server running at http://localhost:${app.server?.port}`
-);
+console.log(`🚀 Server running at http://localhost:${app.server?.port}`);
 
 export type App = typeof app;
->>>>>>> backend

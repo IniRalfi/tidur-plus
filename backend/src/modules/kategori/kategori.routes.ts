@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: kategori routes\nexport {}
-=======
 import { Elysia, t } from "elysia";
 import { kategoriController } from "./kategori.controller";
 
@@ -9,7 +6,7 @@ export const kategoriRoutes = new Elysia({ prefix: "/api/kategori" })
   .get("/", kategoriController.getAll)
   .get("/:id", kategoriController.getById)
 
-// di .post()
+  // di .post()
   .post("/", kategoriController.create, {
     body: t.Object({
       nama: t.String(),
@@ -22,4 +19,3 @@ export const kategoriRoutes = new Elysia({ prefix: "/api/kategori" })
     }),
   })
   .delete("/:id", kategoriController.delete);
->>>>>>> backend

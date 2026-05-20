@@ -1,17 +1,9 @@
-<<<<<<< HEAD
-// TODO: denda service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
 export const dendaService = {
   // Get semua denda dengan pagination & filter
-  getAll: async (params: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    userId?: string;
-  }) => {
+  getAll: async (params: { page?: number; limit?: number; status?: string; userId?: string }) => {
     const { page = 1, limit = 10, status, userId } = params;
     const { take, skip } = getPagination(page, limit);
 
@@ -199,4 +191,3 @@ export const dendaService = {
     };
   },
 };
->>>>>>> backend

@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-// TODO: users controller\nexport {}
-=======
 import { usersService } from "./users.service";
-import {
-  successResponse,
-  errorResponse,
-  paginatedResponse,
-} from "../../utils/response";
+import { successResponse, errorResponse, paginatedResponse } from "../../utils/response";
 
 // Placeholder middleware
 const checkAuth = () => true;
@@ -82,17 +75,10 @@ export const usersController = {
   },
 
   // PATCH /superadmin/users/:id/toggle-role
-  toggleRole: async ({
-    params,
-    body,
-  }: {
-    params: { id: string };
-    body: { role: string };
-  }) => {
+  toggleRole: async ({ params, body }: { params: { id: string }; body: { role: string } }) => {
     try {
       // Placeholder: checkRole("SUPER_ADMIN")
-      if (!body.role)
-        return errorResponse("Role wajib diisi", 400);
+      if (!body.role) return errorResponse("Role wajib diisi", 400);
 
       const data = await usersService.toggleRole(params.id, body.role);
 
@@ -102,18 +88,11 @@ export const usersController = {
         `Role ${body.role} berhasil ${sudahAda ? "ditambahkan" : "dilepas"}`
       );
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("User tidak ditemukan", 404);
+      if (error.message === "NOT_FOUND") return errorResponse("User tidak ditemukan", 404);
       if (error.message === "CANNOT_TOGGLE_ANGGOTA")
-        return errorResponse(
-          "Role ANGGOTA adalah role default dan tidak bisa dilepas",
-          400
-        );
+        return errorResponse("Role ANGGOTA adalah role default dan tidak bisa dilepas", 400);
       if (error.message === "INVALID_ROLE")
-        return errorResponse(
-          "Role tidak valid. Pilihan: ADMIN, SUPER_ADMIN",
-          400
-        );
+        return errorResponse("Role tidak valid. Pilihan: ADMIN, SUPER_ADMIN", 400);
       return errorResponse("Gagal toggle role");
     }
   },
@@ -123,13 +102,9 @@ export const usersController = {
     try {
       // Placeholder: checkRole("SUPER_ADMIN")
       const data = await usersService.toggleAktif(params.id);
-      return successResponse(
-        data,
-        `User berhasil ${data.aktif ? "diaktifkan" : "dinonaktifkan"}`
-      );
+      return successResponse(data, `User berhasil ${data.aktif ? "diaktifkan" : "dinonaktifkan"}`);
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("User tidak ditemukan", 404);
+      if (error.message === "NOT_FOUND") return errorResponse("User tidak ditemukan", 404);
       return errorResponse("Gagal mengubah status user");
     }
   },
@@ -141,10 +116,8 @@ export const usersController = {
       await usersService.delete(params.id);
       return successResponse(null, "User berhasil dihapus");
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("User tidak ditemukan", 404);
+      if (error.message === "NOT_FOUND") return errorResponse("User tidak ditemukan", 404);
       return errorResponse("Gagal menghapus user");
     }
   },
 };
->>>>>>> backend

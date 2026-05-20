@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-// TODO: peminjaman controller\nexport {}
-=======
 import { peminjamanService } from "./peminjaman.service";
-import {
-  successResponse,
-  errorResponse,
-  paginatedResponse,
-} from "../../utils/response";
+import { successResponse, errorResponse, paginatedResponse } from "../../utils/response";
 
 export const peminjamanController = {
   // GET /api/peminjaman
@@ -48,14 +41,11 @@ export const peminjamanController = {
     query: { page?: string; limit?: string; status?: string };
   }) => {
     try {
-      const { data, meta } = await peminjamanService.getByUser(
-        params.userId,
-        {
-          page: query.page ? parseInt(query.page) : 1,
-          limit: query.limit ? parseInt(query.limit) : 10,
-          status: query.status,
-        }
-      );
+      const { data, meta } = await peminjamanService.getByUser(params.userId, {
+        page: query.page ? parseInt(query.page) : 1,
+        limit: query.limit ? parseInt(query.limit) : 10,
+        status: query.status,
+      });
       return paginatedResponse(data, meta, "Berhasil mengambil peminjaman user");
     } catch (error) {
       return errorResponse("Gagal mengambil peminjaman user");
@@ -63,11 +53,7 @@ export const peminjamanController = {
   },
 
   // POST /api/peminjaman
-  create: async ({
-    body,
-  }: {
-    body: { userId: string; bukuId: string };
-  }) => {
+  create: async ({ body }: { body: { userId: string; bukuId: string } }) => {
     try {
       if (!body.userId) return errorResponse("User wajib diisi", 400);
       if (!body.bukuId) return errorResponse("Buku wajib diisi", 400);
@@ -75,15 +61,16 @@ export const peminjamanController = {
       const data = await peminjamanService.create(body.userId, body.bukuId);
       return successResponse(data, "Peminjaman berhasil diajukan");
     } catch (error: any) {
-        if (error.message === "BUKU_NOT_FOUND")
-            return errorResponse("Buku tidak ditemukan", 404);
-        if (error.message === "STOK_HABIS")
-            return errorResponse("Stok buku habis", 400);
-        if (error.message === "SUDAH_DIPINJAM")
-            return errorResponse("Kamu sudah meminjam buku ini", 400);
-        if (error.message === "ADA_DENDA")
-            return errorResponse("Kamu masih memiliki denda yang belum lunas, selesaikan dulu sebelum meminjam", 400);
-        return errorResponse("Gagal mengajukan peminjaman");
+      if (error.message === "BUKU_NOT_FOUND") return errorResponse("Buku tidak ditemukan", 404);
+      if (error.message === "STOK_HABIS") return errorResponse("Stok buku habis", 400);
+      if (error.message === "SUDAH_DIPINJAM")
+        return errorResponse("Kamu sudah meminjam buku ini", 400);
+      if (error.message === "ADA_DENDA")
+        return errorResponse(
+          "Kamu masih memiliki denda yang belum lunas, selesaikan dulu sebelum meminjam",
+          400
+        );
+      return errorResponse("Gagal mengajukan peminjaman");
     }
   },
 
@@ -93,8 +80,7 @@ export const peminjamanController = {
       const data = await peminjamanService.approve(params.id);
       return successResponse(data, "Peminjaman berhasil disetujui");
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("Peminjaman tidak ditemukan", 404);
+      if (error.message === "NOT_FOUND") return errorResponse("Peminjaman tidak ditemukan", 404);
       if (error.message === "INVALID_STATUS")
         return errorResponse("Status peminjaman tidak valid", 400);
       return errorResponse("Gagal menyetujui peminjaman");
@@ -107,8 +93,7 @@ export const peminjamanController = {
       const data = await peminjamanService.tolak(params.id);
       return successResponse(data, "Peminjaman berhasil ditolak");
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("Peminjaman tidak ditemukan", 404);
+      if (error.message === "NOT_FOUND") return errorResponse("Peminjaman tidak ditemukan", 404);
       if (error.message === "INVALID_STATUS")
         return errorResponse("Status peminjaman tidak valid", 400);
       return errorResponse("Gagal menolak peminjaman");
@@ -121,12 +106,9 @@ export const peminjamanController = {
       const data = await peminjamanService.kembalikan(params.id);
       return successResponse(data, "Buku berhasil dikembalikan");
     } catch (error: any) {
-      if (error.message === "NOT_FOUND")
-        return errorResponse("Peminjaman tidak ditemukan", 404);
-      if (error.message === "INVALID_STATUS")
-        return errorResponse("Buku belum dipinjam", 400);
+      if (error.message === "NOT_FOUND") return errorResponse("Peminjaman tidak ditemukan", 404);
+      if (error.message === "INVALID_STATUS") return errorResponse("Buku belum dipinjam", 400);
       return errorResponse("Gagal mengembalikan buku");
     }
   },
 };
->>>>>>> backend

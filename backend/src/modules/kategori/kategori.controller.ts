@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: kategori controller\nexport {}
-=======
 import { kategoriService } from "./kategori.service";
 import { successResponse, errorResponse } from "../../utils/response";
 
@@ -33,20 +30,13 @@ export const kategoriController = {
       const data = await kategoriService.create(body.nama);
       return successResponse(data, "Kategori berhasil dibuat");
     } catch (error: any) {
-      if (error.code === "P2002")
-        return errorResponse("Nama kategori sudah ada", 400);
+      if (error.code === "P2002") return errorResponse("Nama kategori sudah ada", 400);
       return errorResponse("Gagal membuat kategori");
     }
   },
 
   // PUT /api/kategori/:id
-  update: async ({
-    params,
-    body,
-  }: {
-    params: { id: string };
-    body: { nama: string };
-  }) => {
+  update: async ({ params, body }: { params: { id: string }; body: { nama: string } }) => {
     try {
       if (!body.nama) return errorResponse("Nama kategori wajib diisi", 400);
       const exists = await kategoriService.getById(params.id);
@@ -54,8 +44,7 @@ export const kategoriController = {
       const data = await kategoriService.update(params.id, body.nama);
       return successResponse(data, "Kategori berhasil diupdate");
     } catch (error: any) {
-      if (error.code === "P2002")
-        return errorResponse("Nama kategori sudah ada", 400);
+      if (error.code === "P2002") return errorResponse("Nama kategori sudah ada", 400);
       return errorResponse("Gagal mengupdate kategori");
     }
   },
@@ -68,10 +57,8 @@ export const kategoriController = {
       await kategoriService.delete(params.id);
       return successResponse(null, "Kategori berhasil dihapus");
     } catch (error: any) {
-      if (error.code === "P2003")
-        return errorResponse("Kategori masih dipakai oleh buku", 400);
+      if (error.code === "P2003") return errorResponse("Kategori masih dipakai oleh buku", 400);
       return errorResponse("Gagal menghapus kategori");
     }
   },
 };
->>>>>>> backend

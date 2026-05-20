@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-// TODO: buku service\nexport {}
-=======
 import prisma from "../../lib/prisma";
 import { getPagination, getPaginationMeta } from "../../utils/pagination";
 
@@ -110,4 +107,3 @@ export const bukuService = {
     });
   },
 };
->>>>>>> backend

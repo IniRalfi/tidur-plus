@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-// TODO: buku controller\nexport {}
-=======
 import { bukuService } from "./buku.service";
-import {
-  successResponse,
-  errorResponse,
-  paginatedResponse,
-} from "../../utils/response";
+import { successResponse, errorResponse, paginatedResponse } from "../../utils/response";
 
 export const bukuController = {
   // GET /api/buku
@@ -69,10 +62,8 @@ export const bukuController = {
       const data = await bukuService.create(body);
       return successResponse(data, "Buku berhasil ditambahkan");
     } catch (error: any) {
-      if (error.code === "P2002")
-        return errorResponse("ISBN sudah terdaftar", 400);
-      if (error.code === "P2003")
-        return errorResponse("Kategori tidak ditemukan", 404);
+      if (error.code === "P2002") return errorResponse("ISBN sudah terdaftar", 400);
+      if (error.code === "P2003") return errorResponse("Kategori tidak ditemukan", 404);
       return errorResponse("Gagal menambahkan buku");
     }
   },
@@ -104,10 +95,8 @@ export const bukuController = {
       const data = await bukuService.update(params.id, body);
       return successResponse(data, "Buku berhasil diupdate");
     } catch (error: any) {
-      if (error.code === "P2002")
-        return errorResponse("ISBN sudah terdaftar", 400);
-      if (error.code === "P2003")
-        return errorResponse("Kategori tidak ditemukan", 404);
+      if (error.code === "P2002") return errorResponse("ISBN sudah terdaftar", 400);
+      if (error.code === "P2003") return errorResponse("Kategori tidak ditemukan", 404);
       return errorResponse("Gagal mengupdate buku");
     }
   },
@@ -120,10 +109,8 @@ export const bukuController = {
       await bukuService.delete(params.id);
       return successResponse(null, "Buku berhasil dihapus");
     } catch (error: any) {
-      if (error.code === "P2003")
-        return errorResponse("Buku masih memiliki peminjaman aktif", 400);
+      if (error.code === "P2003") return errorResponse("Buku masih memiliki peminjaman aktif", 400);
       return errorResponse("Gagal menghapus buku");
     }
   },
 };
->>>>>>> backend

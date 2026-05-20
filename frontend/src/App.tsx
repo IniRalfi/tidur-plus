@@ -1,95 +1,35 @@
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// import { APITester } from "./APITester";
-// import { Calendar, CalendarDayButton } from "./components/ui/calendar";
-
-// import logo from "./logo.svg";
-// import reactLogo from "./react.svg";
-
-// export function App() {
-//   return (
-//     <div className="container mx-auto p-8 text-center relative z-10">
-//       <div className="flex justify-center items-center gap-8 mb-8">
-//         <img
-//           src={logo}
-//           alt="Bun Logo"
-//           className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#646cffaa] scale-120"
-//         />
-//         <img
-//           src={reactLogo}
-//           alt="React Logo"
-//           className="h-36 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] [animation:spin_20s_linear_infinite]"
-//         />
-//       </div>
-//       <Card>
-//         <CardHeader className="gap-4">
-//           <CardTitle className="text-3xl font-bold">Bun + React</CardTitle>
-//           <CardDescription>
-//             Edit{" "}
-//             <code className="rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono">src/App.tsx</code>{" "}
-//             and save to test HMR
-//           </CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <APITester />
-//         </CardContent>
-//       </Card>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import KatalogPage from './pages/public/KatalogPage';
-import BukuDetailPage from './pages/public/BukuDetailPage';
-import PeminjamanPage from './pages/anggota/PeminjamanPage';
-import PeminjamanDetailPage from './pages/anggota/PeminjamanDetailPage';
-import DashboardPage from './pages/anggota/DashboardPage';
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* URL utama (localhost:5173) akan buka Home */}
-        <Route path="/" element={<DashboardPage />} />
-
-        <Route path="/katalog" element={<KatalogPage />} />
-        
-        {/* URL dengan ID (localhost:5173/katalog/buku-1) akan buka Detail Buku */}
-        <Route path="/katalog/:id" element={<BukuDetailPage />} />
-        
-        {/* URL untuk halaman peminjaman (localhost:5173/peminjaman) */}
-        <Route path="/peminjaman" element={<PeminjamanPage />} />
-        
-        {/* URL untuk halaman detail peminjaman (localhost:5173/peminjaman/:id) */}
-        <Route path="/peminjaman/:id" element={<PeminjamanDetailPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+// Public Pages
+import KatalogPage from "./pages/public/KatalogPage";
+import BukuDetailPage from "./pages/public/BukuDetailPage";
+
+// Anggota Pages
+import ProfilPage from "./pages/anggota/ProfilPage";
+import AnggotaDashboardPage from "./pages/anggota/DashboardPage";
+import AnggotaPeminjamanPage from "./pages/anggota/PeminjamanPage";
+import AnggotaPeminjamanDetailPage from "./pages/anggota/PeminjamanDetailPage";
+
+// Admin Pages
+import AdminDashboardPage from "./pages/admin/DashboardPage";
+import BukuPage from "./pages/admin/BukuPage";
+import AnggotaPage from "./pages/admin/AnggotaPage";
+import AdminPeminjamanPage from "./pages/admin/PeminjamanPage";
+import AdminPeminjamanDetailPage from "./pages/admin/PeminjamanDetailPage";
+import DendaPage from "./pages/admin/DendaPage";
 
 // Superadmin Pages
 import UsersPage from "./pages/superadmin/UsersPage";
 import KonfigurasiPage from "./pages/superadmin/KonfigurasiPage";
 import AuditLogPage from "./pages/superadmin/AuditLogPage";
 
-// Auth & Profil
+// Auth & Callback
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-import ProfilPage from "./pages/anggota/ProfilPage";
 import CallbackPage from "./pages/auth/CallbackPage";
 
-// Layout
+// Layouts
 import AdminLayout from "./components/layout/AdminLayout";
-
-// Admin Pages
-import DashboardPage from "./pages/admin/DashboardPage";
-import BukuPage from "./pages/admin/BukuPage";
-import AnggotaPage from "./pages/admin/AnggotaPage";
-import PeminjamanPage from "./pages/admin/PeminjamanPage";
-import PeminjamanDetailPage from "./pages/admin/PeminjamanDetailPage";
-import DendaPage from "./pages/admin/DendaPage";
 
 function ComingSoon({ name }: { name: string }) {
   return (
@@ -106,22 +46,30 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect halaman utama ke login */}
-        <Route path="/" element={<Navigate to="/login" />} />
-
         {/* Routing Umum / Autentikasi & Profil */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profil" element={<ProfilPage />} />
         <Route path="/auth/google/callback" element={<CallbackPage />} />
 
+        {/* URL utama akan buka Dashboard Anggota (sebagai Home) */}
+        <Route path="/" element={<AnggotaDashboardPage />} />
+        
+        {/* Public Routes */}
+        <Route path="/katalog" element={<KatalogPage />} />
+        <Route path="/katalog/:id" element={<BukuDetailPage />} />
+        
+        {/* Anggota Routes */}
+        <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
+        <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
+
         {/* 🔐 Routing Kelompok Admin menggunakan Pembungkus AdminLayout */}
         <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/admin/buku" element={<BukuPage />} />
           <Route path="/admin/anggota" element={<AnggotaPage />} />
-          <Route path="/admin/peminjaman" element={<PeminjamanPage />} />
-          <Route path="/admin/peminjaman/:id" element={<PeminjamanDetailPage />} />
+          <Route path="/admin/peminjaman" element={<AdminPeminjamanPage />} />
+          <Route path="/admin/peminjaman/:id" element={<AdminPeminjamanDetailPage />} />
           <Route path="/admin/denda" element={<DendaPage />} />
         </Route>
 
@@ -137,3 +85,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

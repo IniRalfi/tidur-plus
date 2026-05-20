@@ -6,7 +6,7 @@ export interface User {
   email: string
   googleId?: string
   avatarUrl?: string
-  role: Role
+  roles: Role[]
   createdAt: string
   updatedAt: string
 }

@@ -33,6 +33,8 @@ import CallbackPage from "./pages/auth/CallbackPage";
 
 // Layouts
 import AdminLayout from "./components/layout/AdminLayout";
+import AuthWrapper from "./components/auth/AuthWrapper";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function ComingSoon({ name }: { name: string }) {
   return (
@@ -48,51 +50,52 @@ function ComingSoon({ name }: { name: string }) {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+      <AuthWrapper>
+        <Routes>
+          {/* Landing Page */}
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Routing Umum / Autentikasi & Profil */}
-        {/* Redirect halaman utama ke login */}
-        <Route path="/" element={<Navigate to="/login" />} />
+          {/* Auth */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/google/callback" element={<CallbackPage />} />
 
-        {/* Auth & Profil */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/profil" element={<ProfilPage />} />
-        <Route path="/auth/google/callback" element={<CallbackPage />} />
+          {/* Public Routes */}
+          <Route path="/katalog" element={<KatalogPage />} />
+          <Route path="/katalog/:id" element={<BukuDetailPage />} />
 
-        {/* URL utama akan buka Dashboard Anggota (sebagai Home) */}
-        <Route path="/dashboard" element={<AnggotaDashboardPage />} />
-        
-        {/* Public Routes */}
-        <Route path="/katalog" element={<KatalogPage />} />
-        <Route path="/katalog/:id" element={<BukuDetailPage />} />
+          {/* 🔐 Routing Kelompok Anggota (Default) */}
+          <Route element={<ProtectedRoute allowedRoles={["ANGGOTA", "ADMIN", "SUPER_ADMIN"]} />}>
+            <Route path="/dashboard" element={<AnggotaDashboardPage />} />
+            <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
+            <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
+            <Route path="/profil" element={<ProfilPage />} />
+          </Route>
 
-        {/* Anggota Routes */}
-        <Route path="/dashboard" element={<AnggotaDashboardPage />} />
-        <Route path="/peminjaman" element={<AnggotaPeminjamanPage />} />
-        <Route path="/peminjaman/:id" element={<AnggotaPeminjamanDetailPage />} />
+          {/* 🔐 Routing Kelompok Admin menggunakan Pembungkus AdminLayout */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/admin/buku" element={<BukuPage />} />
+              <Route path="/admin/anggota" element={<AnggotaPage />} />
+              <Route path="/admin/peminjaman" element={<AdminPeminjamanPage />} />
+              <Route path="/admin/peminjaman/:id" element={<AdminPeminjamanDetailPage />} />
+              <Route path="/admin/denda" element={<DendaPage />} />
+            </Route>
+          </Route>
 
-        {/* 🔐 Routing Kelompok Admin menggunakan Pembungkus AdminLayout */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-          <Route path="/admin/buku" element={<BukuPage />} />
-          <Route path="/admin/anggota" element={<AnggotaPage />} />
-          <Route path="/admin/peminjaman" element={<AdminPeminjamanPage />} />
-          <Route path="/admin/peminjaman/:id" element={<AdminPeminjamanDetailPage />} />
-          <Route path="/admin/denda" element={<DendaPage />} />
-        </Route>
+          {/* 🔐 Routing Kelompok Superadmin */}
+          <Route element={<ProtectedRoute allowedRoles={["SUPER_ADMIN"]} />}>
+            <Route path="/superadmin" element={<Navigate to="/superadmin/users" replace />} />
+            <Route path="/superadmin/users" element={<UsersPage />} />
+            <Route path="/superadmin/konfigurasi" element={<KonfigurasiPage />} />
+            <Route path="/superadmin/audit-log" element={<AuditLogPage />} />
+          </Route>
 
-        {/* 🔐 Routing Kelompok Superadmin */}
-        <Route path="/superadmin" element={<Navigate to="/superadmin/users" replace />} />
-        <Route path="/superadmin/users" element={<UsersPage />} />
-        <Route path="/superadmin/konfigurasi" element={<KonfigurasiPage />} />
-        <Route path="/superadmin/audit-log" element={<AuditLogPage />} />
-
-        {/* Fallback jika rute tidak ditemukan */}
-        <Route path="*" element={<ComingSoon name="404 — Halaman tidak ditemukan" />} />
-      </Routes>
+          {/* Fallback jika rute tidak ditemukan */}
+          <Route path="*" element={<ComingSoon name="404 — Halaman tidak ditemukan" />} />
+        </Routes>
+      </AuthWrapper>
     </BrowserRouter>
   );
 }

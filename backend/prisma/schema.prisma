@@ -8,144 +8,154 @@ datasource db {
 }
 
 enum Role {
-  anggota
-  admin
-  super_admin
+  ANGGOTA
+  ADMIN
+  SUPER_ADMIN
 }
 
 enum StatusPeminjaman {
-  dipesan
-  dipinjam
-  dikembalikan
-  ditolak
+  MENUNGGU
+  DIPINJAM
+  DIKEMBALIKAN
+  DITOLAK
 }
 
 enum StatusPerpanjangan {
-  menunggu
-  disetujui
-  ditolak
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
 }
 
 enum StatusDenda {
-  belum_lunas
-  lunas
-}
-
-enum CoverSource {
-  upload
-  url
+  BELUM_LUNAS
+  LUNAS
 }
 
 model User {
   id        String   @id @default(cuid())
-  name      String
+  googleId  String?  @unique
+  nama      String
   email     String   @unique
-  googleId  String?  @unique @map("google_id")
-  avatarUrl String?  @map("avatar_url")
-  role      Role     @default(anggota)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  foto      String?
+  roles     Role[]   @default([ANGGOTA])
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   peminjaman           Peminjaman[]
-  denda                Denda[]
-  adminPerpanjangan    Perpanjangan[] @relation("AdminPerpanjangan")
-  adminDenda           Denda[]        @relation("AdminDenda")
-  konfigurasiDiupdate  Konfigurasi[]
+  auditLog             AuditLog[]
+  perpanjanganDiproses Perpanjangan[] @relation("PerpanjanganAdmin")
+  dendaDiproses        Denda[]        @relation("DendaAdmin")
 
-  @@map("users")
+  @@index([aktif])
 }
 
 model Kategori {
-  id   String @id @default(cuid())
-  nama String @unique
-  buku Buku[]
+  id        String   @id @default(cuid())
+  nama      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@map("kategori")
+  buku Buku[]
 }
 
 model Buku {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   judul       String
-  pengarang   String
+  penulis     String
   penerbit    String?
-  tahun       Int?
-  isbn        String?     @unique
-  kategoriId  String      @map("kategori_id")
-  stok        Int         @default(0)
-  coverUrl    String?     @map("cover_url")
-  coverSource CoverSource @default(url) @map("cover_source")
+  tahunTerbit Int?
+  isbn        String?  @unique
+  stok        Int      @default(0)
+  cover       String?
   deskripsi   String?
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  kategoriId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   kategori   Kategori     @relation(fields: [kategoriId], references: [id])
   peminjaman Peminjaman[]
 
-  @@map("buku")
+  @@index([kategoriId])
+  @@index([judul])
+  @@index([penulis])
+  @@index([stok])
 }
 
 model Peminjaman {
   id                  String           @id @default(cuid())
-  userId              String           @map("user_id")
-  bukuId              String           @map("buku_id")
-  status              StatusPeminjaman @default(dipesan)
-  tglPinjam           DateTime?        @map("tgl_pinjam")
-  tglKembaliRencana   DateTime?        @map("tgl_kembali_rencana")
-  tglKembaliAktual    DateTime?        @map("tgl_kembali_aktual")
-  counterPerpanjangan Int              @default(0) @map("counter_perpanjangan")
-  createdAt           DateTime         @default(now()) @map("created_at")
-  updatedAt           DateTime         @updatedAt @map("updated_at")
+  userId              String
+  bukuId              String
+  tanggalPinjam       DateTime?
+  tanggalKembali      DateTime?
+  batasKembali        DateTime?
+  status              StatusPeminjaman @default(MENUNGGU)
+  counterPerpanjangan Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   user         User           @relation(fields: [userId], references: [id])
   buku         Buku           @relation(fields: [bukuId], references: [id])
   perpanjangan Perpanjangan[]
-  denda        Denda[]
+  denda        Denda?
 
-  @@map("peminjaman")
+  @@index([userId])
+  @@index([bukuId])
+  @@index([batasKembali])
 }
 
 model Perpanjangan {
   id           String             @id @default(cuid())
-  peminjamanId String             @map("peminjaman_id")
-  durasiHari   Int                @map("durasi_hari")
-  status       StatusPerpanjangan @default(menunggu)
-  tglPengajuan DateTime           @default(now()) @map("tgl_pengajuan")
-  tglDiproses  DateTime?          @map("tgl_diproses")
-  adminId      String?            @map("admin_id")
+  peminjamanId String
+  adminId      String?
+  jumlahHari   Int
+  status       StatusPerpanjangan @default(MENUNGGU)
+  tglDiproses  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
   peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
-  admin      User?      @relation("AdminPerpanjangan", fields: [adminId], references: [id])
+  admin      User?      @relation("PerpanjanganAdmin", fields: [adminId], references: [id])
 
-  @@map("perpanjangan")
+  @@index([peminjamanId])
+  @@index([adminId])
 }
 
 model Denda {
   id              String      @id @default(cuid())
-  peminjamanId    String      @map("peminjaman_id")
-  userId          String      @map("user_id")
-  jumlahHariTelat Int         @map("jumlah_hari_telat")
-  tarifPerHari    Int         @map("tarif_per_hari")
-  totalDenda      Int         @map("total_denda")
-  status          StatusDenda @default(belum_lunas)
-  tglLunas        DateTime?   @map("tgl_lunas")
-  adminId         String?     @map("admin_id")
-  createdAt       DateTime    @default(now()) @map("created_at")
+  peminjamanId    String      @unique
+  adminId         String?
+  jumlah          Float
+  jumlahHariTelat Int
+  tarifPerHari    Float
+  status          StatusDenda @default(BELUM_LUNAS)
+  tglLunas        DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   peminjaman Peminjaman @relation(fields: [peminjamanId], references: [id])
-  user       User       @relation(fields: [userId], references: [id])
-  admin      User?      @relation("AdminDenda", fields: [adminId], references: [id])
+  admin      User?      @relation("DendaAdmin", fields: [adminId], references: [id])
 
-  @@map("denda")
+  @@index([adminId])
 }
 
 model Konfigurasi {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  value       String
-  updatedBy   String   @map("updated_by")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(cuid())
+  tarifDenda      Float    @default(1000)
+  durasiPinjam    Int      @default(14)
+  maxPerpanjangan Int      @default(2)
+  updatedAt       DateTime @updatedAt
+}
 
-  updatedByUser User @relation(fields: [updatedBy], references: [id])
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  aksi      String
+  detail    String?
+  createdAt DateTime @default(now())
 
-  @@map("konfigurasi")
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
 }
